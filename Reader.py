@@ -1,7 +1,6 @@
 import os
 import re
-
-
+import bs4
 class ReadFile(object):
 
     def __init__(self, path):
@@ -27,6 +26,28 @@ class ReadFile(object):
             file.write(docsContent[i])
             file.close()
 
-
-
+    def separeteTags(self,txt, tag, returnWithoutTag):
+        """
+        this method separete txt throw its givaen tag for exsample:
+        <TEXT>
+            this is text
+        </TEXT>
+        <TEXT>
+            another text
+        </TEXT>
+        the function return a string list of ['this is text', 'another text']
+        :param txt: text you want to separate
+        :param tag: tha tag you eant i'ts data
+        :param returnWithoutTag: TRUE - return ['<text>this is text</text>', '<text>another text</text>']
+        :return: list of string
+        """
+        ans = []
+        soup = bs4.BeautifulSoup(txt, 'html.parser')
+        tagdata = soup.find_all(tag.lower())
+        for iter in tagdata:
+            if returnWithoutTag:
+                ans.append(iter.get_text())
+            else:
+                ans.append(str(iter))
+        return ans
 
