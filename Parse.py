@@ -115,7 +115,7 @@ class Parser:
 
         return i, term
 
-
+    # TODO fix index that return from the function
     def isFraction(self, fraction):
         """
         check if string is a fraction from the formst X/Y
@@ -177,27 +177,30 @@ class Parser:
             if i+1 < len(tokens) and self.isFraction(tokens[i + 1]):
                 fraction += tokens[i + 1]
                 i=i+1
-                return i,orginalToken+fraction+" "+"Dollars"
+                return i+1,orginalToken+fraction+" "+"Dollars"
             elif flag:
                 term = orginalToken + " Dollars"
             else:
                 term = orginalToken + " Dollars"
+                if i+1<len(tokens) and tokens[i+1]=='dollars':
+                    i = i+ 1
 
 
         else:
             if x % sizes["million"] == 0:
                 term = str(int(x/sizes["million"])) + "M"
-                if flag:
-                    term += " Dollars"
-                    i = i + 1
-                elif i+1 < len(tokens) and tokens[i+1].lower() == "dollars":
-                    term += " Dollars"
-                    i = i + 1
-                elif i+2 < len(tokens) and tokens[i+1].lower() == "u.s." and tokens[i+2].lower() == "dollars":
-                    term += " Dollars"
-                    i = i+1
             else:
-                term = str(x / sizes["million"]) + "M Dollars"
+                term = str(x / sizes["million"]) + "M"
+
+        if flag:
+            term += " Dollars"
+            i = i + 1
+        elif i + 1 < len(tokens) and tokens[i + 1].lower() == "dollars":
+            term += " Dollars"
+            i = i + 1
+        elif i + 2 < len(tokens) and tokens[i + 1].lower() == "u.s." and tokens[i + 2].lower() == "dollars":
+            term += " Dollars"
+            i = i + 2
         return i, term
 
 
