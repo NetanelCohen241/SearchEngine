@@ -206,12 +206,12 @@ class Parser:
     #get num of month and day, return date format MM-DD or YYYY-MM
     def dateFormat(self, month, number):
 
-        if(number<10):
-            number= "0"+number
-        if number>31:
-            return number + "-" + month
-        else:
-            return month + "-" + number
+            if int(number) < 10:
+                number = "0" + number
+            if int(number) > 31:
+                return number + "-" + month
+            else:
+                return month + "-" + number
 
     #param- name of month
     #return the month number or  if its not a month
@@ -243,8 +243,8 @@ class Parser:
 
         term = ""
         fraction = " "
-        sizes = {"m": 1000000, "million": 1000000, "billion": 1000000000,"bn":1000000000, "trillion": 1000000000000}
-        orginalToken=tokens[i]
+        sizes = {"m": 1000000, "million": 1000000, "billion": 1000000000, "bn": 1000000000, "trillion": 1000000000000}
+        orginalToken = tokens[i]
         x = self.str_to_number(tokens[i])
         if i + 1 < len(tokens):
             if tokens[i + 1].lower() in sizes:
@@ -253,27 +253,26 @@ class Parser:
 
         # claasify the size of the number
         if x < sizes["million"]:
-            if i+1 < len(tokens) and self.isFraction(tokens[i + 1]):
+            if i + 1 < len(tokens) and self.isFraction(tokens[i + 1]):
                 fraction += tokens[i + 1]
-                i=i+1
-                return i+1,orginalToken+fraction+" "+"Dollars"
+                i = i + 1
+                return i + 1, orginalToken + fraction + " " + "Dollars"
             elif flag:
                 term = orginalToken + " Dollars"
             else:
                 term = orginalToken + " Dollars"
-                if i+1<len(tokens) and tokens[i+1]=='dollars':
-                    i = i+ 1
+                if i + 1 < len(tokens) and tokens[i + 1] == 'dollars':
+                    i = i + 1
 
 
         else:
             if x % sizes["million"] == 0:
-                term = str(int(x/sizes["million"])) + "M"
+                term = str(int(x / sizes["million"])) + "M"
             else:
                 term = str(x / sizes["million"]) + "M"
 
         if flag:
             term += " Dollars"
-            i = i + 1
         elif i + 1 < len(tokens) and tokens[i + 1].lower() == "dollars":
             term += " Dollars"
             i = i + 1
