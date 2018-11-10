@@ -1,10 +1,13 @@
 import ast
 import nltk
 import re
-months = ["january", "jan", "february", "feb", "march", "mar", "april", "apr", "may", "june", "jun", "july", "jul",
+from nltk.stem import PorterStemmer
+
+
+months = ["january", "jan", "february", "feb", "march", "mar", "april", "apr", "may", "may", "june", "jun", "july", "jul",
           "august", "aug", "september", "sep", "october", "oct", "november", "nov", "december", "dec"]
 
-
+size = ["trillion", "billion", "million", "thousand"]
 class Parser:
 
     def __init__(self):
@@ -12,54 +15,130 @@ class Parser:
         self.terms=[]
 
 
-    def parse(self,text):
+    def parse(self,text,withStemmind):
         i=0
         terms=[]
-        tokens=nltk.word_tokenize(text)
+        tokens= (str(text).replace(':','').replace('"','').replace('!','').replace('?','').replace('*','')
+                 .replace('(','').replace(')','').replace('[','').replace(']','').replace('{','').replace('}','').split(' '))
+        with open("stop_words.txt","r") as sw:
+            stopWords=sw.read();
         while i < len(tokens):
 
-            if tokens[i].isdigit():
-                # Date
-                mon= self.getMonth(tokens[i+1].lower())
-                if mon!=0:
-                    terms.append(self.dateFormat(mon, tokens[i]))
-                    i = i + 1
+            if tokens[i] in stopWords:
+                i=i+1
+                continue
+            #Price
+            if tokens[i].startswith("$",0,1):
+                tokens[i]=tokens[i].replace('$', '')
+                if '-' in tokens[i]:
+                    j, term = self.calcPrice(tokens[i].replace('-',' ').split(' ')[0], 0, True)
+                elif i+1<len(tokens):
+                    j, term = self.calcPrice([tokens[i],tokens[i+1]], 0, True)
+                    i+=j
+                else:
+                    j, term = self.calcPrice(tokens[i], 0, True)
+
+
+            #Percent
+            elif tokens[i].endswith("%",len(tokens[i])-1):
+                if self.isNumber(tokens[i].replace('%','')):
+                    term= tokens[i]+"%"
             # Number
             elif self.isNumber(tokens[i]):
 
                 #Percent
-                if tokens[i+1] is "percent" or tokens[i+1] is "percentage" or tokens[i+1] is "%":
+                if i+1<len(tokens) and (tokens[i+1] == "percent" or tokens[i+1] == "percentage"):
                     term=tokens[i+1]+"%"
+                    i=i+1
                 #Price
-                elif tokens[i+1] is "Dollars" or tokens[i+2] is "Dollars" or tokens[i+3] is "dollars":
-                    i,term=self.calcPrice(tokens,i)
+                elif (i+1<len(tokens) and tokens[i+1] == "Dollars") or (i+2<len(tokens) and (tokens[i+2] == "Dollars" or tokens[i+2] == "U.S.")):
+                    i,term= self.calcPrice(tokens, i, False)
                 #Number(only size)
                 else:
-                    i,term=self.calcSize(tokens,i)
-
-
-            elif tokens[i] == '$':
-                if self.isNumber(tokens[i+1]):
-                    i, term = self.calcPrice(tokens, i)
+                    acc=0
+                    #number range
+                    if i+1<len(tokens) and '-' in tokens[i+1]:
+                        rangeTokens=tokens[i+1].split('-')
+                        if rangeTokens[0].lower() in size:
+                            #left value in range
+                            j,t=self.calcSize([tokens[i],rangeTokens[0]],0)
+                            terms.append(t)
+                            term=t
+                            acc=acc+1
+                            if self.isNumber(rangeTokens[1]):
+                                # Number-Number
+                                if i+2<len(tokens) and tokens[i+2].lower() in size:
+                                    j, t2 = self.calcSize([rangeTokens[1], tokens[i+2]], 0)
+                                    terms.append(t2)
+                                    term=term+"-"+t2
+                                    i=i+acc+1
+                            #Number-Word
+                            else:
+                                i=i+1
+                                term=term+"-"+rangeTokens[1]
+                    elif tokens[i].isdigit():
+                        # Date
+                        if i+1>len(tokens):
+                            mon = self.getMonth(tokens[i+1].lower())
+                            if mon is not "0":
+                                term = self.dateFormat(mon, tokens[i])
+                                i=i+1
+                    else:
+                        i,term=self.calcSize(tokens,i)
 
             #Word
             else:
                 #Date
                 mon = self.getMonth(tokens[i].lower())
-                if mon != 0:
-                    if tokens[i + 1].isdigit():
+                if mon is not "0":
+                    if i+1<len(tokens) and tokens[i + 1].isdigit():
                         term=self.dateFormat(mon, tokens[i+1])
                         i=i+1
                     else:
                         term=tokens[i]
 
-                #check if its the range pattern: "between Number and Number"
-                elif tokens[i].lower() is "between" and self.isNumber(tokens[i+1]) and tokens[i+2].lower() is "and" and self.isNumber(tokens[i+3]):
+                #check if its range pattern: "between Number and Number"
+                elif i+3<len(tokens) and tokens[i].lower() == "between" and self.isNumber(tokens[i+1]) and \
+                        tokens[i+2].lower() == "and" and self.isNumber(tokens[i+3]):
                     term="between "+tokens[i+1]+" and "+tokens[i+3]
+                    terms.extend([tokens[i+1],tokens[i+3]])
                     i=i+3
+                #range
+                elif '-' in tokens[i]:
+                    rangeTokens=tokens[i].split('-')
+                    #Word-Word-Word
+                    if len(rangeTokens) == 3:
+                        terms.extend([rangeTokens[0],rangeTokens[1],rangeTokens[2]])
+                        term=tokens[i]
+                    else:
+                        t1=rangeTokens[0]
+                        t2=rangeTokens[1]
+                        if self.isNumber(rangeTokens[0]):
+                            # Number -
+                            j,t1=self.calcSize(rangeTokens,0)
+                            if rangeTokens[1] == "percent":
+                                term= rangeTokens[0]+"%"
 
+                        if self.isNumber(rangeTokens[1]):
+                            # - Number
+                            if i+1<len(tokens) and tokens[i+1].lower() in size:
+                                j,t2=self.calcSize([rangeTokens[1],tokens[i+1]],0)
+                                i=i+1
+                            else:
+                                j,t2=self.calcSize(rangeTokens[1],0)
+                        #add to terms list range right value and range left value
+                        terms.extend([t1,t2])
+                        if term == "":
+                            term=t1+"-"+t2
+                else:
+                    tokens[i].replace(',','').replace('.','')
+                    term=tokens[i]
             terms.append(term)
             i=i+1
+        if withStemmind is True:
+            return self.stem(terms)
+        else:
+            return terms
 
     def str_to_number(self,num):
         """
@@ -70,7 +149,6 @@ class Parser:
         return ast.literal_eval("".join(num.split(",")))
 
 
-    #TODO:Twitoo
     def calcSize(self,tokens, i):
         """
         this methode assest the size of the number
@@ -115,7 +193,7 @@ class Parser:
 
         return i, term
 
-    # TODO fix index that return from the function
+
     def isFraction(self, fraction):
         """
         check if string is a fraction from the formst X/Y
@@ -138,15 +216,16 @@ class Parser:
     #param- name of month
     #return the month number or  if its not a month
     def getMonth(self, month):
-
-        for i in len(24):
-            if month == months[i]:
-                if i < 12:
-                    return "0"+i/2
+        i=0
+        while i < 12:
+            if month == months[2*i+1] or month == months[2*i]:
+                if i < 10:
+                    return "0"+str(i+1)
                 else:
-                    return ""+i/2
+                    return str(i+1)
+            i+=1
 
-        return ""+0
+        return "0"
 
     #param- token
     #return true if its a number or fraction
@@ -202,6 +281,14 @@ class Parser:
             term += " Dollars"
             i = i + 2
         return i, term
+
+    def stem(self, tokens):
+        terms=[]
+        ps = PorterStemmer()
+        for token in tokens:
+            terms.append(ps.stem(token))
+        return terms
+
 
 
 
