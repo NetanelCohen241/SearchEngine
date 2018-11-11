@@ -11,20 +11,6 @@ import time
 import  Parse
 from bs4 import BeautifulSoup
 
-
-
-
-def BeautifulTags(txt, tag, returnWithoutTag):
-        ans = []
-        soup = bs4.BeautifulSoup(txt, 'html.parser')
-        tagdata = soup.find_all(tag.lower())
-        for iter in tagdata:
-            if returnWithoutTag:
-                ans.append(iter.get_text())
-            else:
-                ans.append(str(iter))
-        return ans
-
 # d = defaultdict(int)
 # with open("FB396001",'r') as f:
 #     txt=f.read()
@@ -32,28 +18,17 @@ def BeautifulTags(txt, tag, returnWithoutTag):
 #         d[word] += 1
 #     print(d)
 
-
-def splitTags(txt):
-    ans=[]
-    docList = txt.split("</DOC>\n\n<DOC>")
-    for i in docList:
-        docNumber= re.findall(r'<DOCNO>(.*?)</DOCNO>',i)
-        if i.__contains__("<F"):
-            docCity=re.findall(r'<F P=104>(.*?)</F>',i)
-            if len(docCity) > 0 and docCity[0] != "":
-               docCity=docCity[0]
-        else:
-            docCity = ""
-        textContent= (i.split("<TEXT>")[1]).split("</TEXT")[0]
-        doc = Doc.Document(docNumber,textContent,docCity)
-        ans.append(doc)
-    return ans
-
-
+r=Reader.ReadFile("")
 with open("FB396001","r") as f:
     ftxt=f.read()
     t=time.time()
-    split=splitTags(ftxt)
+    split=r.splitTags(ftxt)
     for i in split:
         print(i.toString())
-    print(time.time()-t)
+    print(time.time()-t,len(split))
+#
+# check=['1.76 dollars','60,000 dollars']
+# x=Parse.Parser()
+# for c in check:
+#     print("orginal value: " + c," ==> ")
+#     print(x.calcPrice(c.split(),0,False))

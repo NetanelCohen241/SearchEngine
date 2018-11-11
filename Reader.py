@@ -65,11 +65,11 @@ class ReadFile(object):
         ans = []
         docList = txt.split("</DOC>\n\n<DOC>")
         for i in docList:
-            docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)
+            docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0]
             if i.__contains__("<F"):
                 docCity = re.findall(r'<F P=104>(.*?)</F>', i)
                 if len(docCity) > 0 and docCity[0] != "":
-                    docCity = docCity[0]
+                    docCity = docCity[0].split()[0].upper()
             else:
                 docCity = ""
             textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]
