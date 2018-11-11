@@ -1,6 +1,10 @@
 import os
 import re
 import bs4
+
+import Doc
+
+
 class ReadFile(object):
 
     def __init__(self, path):
@@ -51,3 +55,24 @@ class ReadFile(object):
                 ans.append(str(iter))
         return ans
 
+    def splitTags(self,txt):
+        """
+        this function get text of file and return list of all document inside as an object that incude id number
+        city,and text content ( string between <text< tag>
+        :param txt: string of a file that conatain <doc> tag
+        :return:  list of document object
+        """
+        ans = []
+        docList = txt.split("</DOC>\n\n<DOC>")
+        for i in docList:
+            docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)
+            if i.__contains__("<F"):
+                docCity = re.findall(r'<F P=104>(.*?)</F>', i)
+                if len(docCity) > 0 and docCity[0] != "":
+                    docCity = docCity[0]
+            else:
+                docCity = ""
+            textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]
+            doc = Doc.Document(docNumber, textContent, docCity)
+            ans.append(doc)
+        return ans
