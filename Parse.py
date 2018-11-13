@@ -15,15 +15,16 @@ class Parser:
         self.terms=[]
 
 
-    def parse(self,text,withStemmind):
+    def parse(self,text,withStemming):
         i=0
         terms=[]
+
         tokens= (str(text).replace(':','').replace('"','').replace('!','').replace('?','').replace('*','')
                  .replace('(','').replace(')','').replace('[','').replace(']','').replace('{','').replace('}','').split(' '))
         with open("stop_words.txt","r") as sw:
             stopWords=sw.read();
         while i < len(tokens):
-
+            term = ""
             if tokens[i] in stopWords:
                 i=i+1
                 continue
@@ -31,7 +32,7 @@ class Parser:
             if tokens[i].startswith("$",0,1):
                 tokens[i]=tokens[i].replace('$', '')
                 if '-' in tokens[i]:
-                    j, term = self.calcPrice(tokens[i].replace('-',' ').split(' ')[0], 0, True)
+                    j, term = self.calcPrice(tokens[i].replace('-',' ').split(' '), 0, True)
                 elif i+1<len(tokens):
                     j, term = self.calcPrice([tokens[i],tokens[i+1]], 0, True)
                     i+=j
@@ -41,14 +42,17 @@ class Parser:
 
             #Percent
             elif tokens[i].endswith("%",len(tokens[i])-1):
-                if self.isNumber(tokens[i].replace('%','')):
-                    term= tokens[i]+"%"
+                tokens[i]=tokens[i].replace('%', '')
+                if self.isNumber(tokens[i]):
+                    i,term= self.calcSize(tokens,i)
+                    term+="%"
             # Number
             elif self.isNumber(tokens[i]):
 
                 #Percent
                 if i+1<len(tokens) and (tokens[i+1] == "percent" or tokens[i+1] == "percentage"):
-                    term=tokens[i+1]+"%"
+                    i, term = self.calcSize(tokens, i)
+                    term += '%'
                     i=i+1
                 #Price
                 elif (i+1<len(tokens) and tokens[i+1] == "Dollars") or (i+2<len(tokens) and (tokens[i+2] == "Dollars" or tokens[i+2] == "U.S.")):
@@ -78,13 +82,15 @@ class Parser:
                                 term=term+"-"+rangeTokens[1]
                     elif tokens[i].isdigit():
                         # Date
-                        if i+1>len(tokens):
+                        if i+1<len(tokens):
                             mon = self.getMonth(tokens[i+1].lower())
                             if mon is not "0":
                                 term = self.dateFormat(mon, tokens[i])
                                 i=i+1
+                            else:
+                                i,term=self.calcSize(tokens,i)
                     else:
-                        i,term=self.calcSize(tokens,i)
+                        i, term = self.calcSize(tokens, i)
 
             #Word
             else:
@@ -135,7 +141,8 @@ class Parser:
                     term=tokens[i]
             terms.append(term)
             i=i+1
-        if withStemmind is True:
+
+        if withStemming is True:
             return self.stem(terms)
         else:
             return terms
@@ -169,6 +176,8 @@ class Parser:
             elif self.isFraction(tokens[i+1]):
                 fraction += tokens[i+1]
                 i = i + 1
+            else:
+                fraction=""
         #claasify the size of the number
         if x < sizes["thousand"]:
             term = str(x) + fraction
@@ -200,18 +209,22 @@ class Parser:
         :param fraction: string to chech
         :return: True - is a fraction
         """
-        list = fraction.split("/")
-        return list[0].isnumeric() and list[-1].isnumeric()
+        list=[]
+        if '/' in fraction:
+            list = fraction.split("/")
+            return list[0].isnumeric() and list[1].isnumeric()
+        else:
+            return False
 
     #get num of month and day, return date format MM-DD or YYYY-MM
     def dateFormat(self, month, number):
 
-            if int(number) < 10:
-                number = "0" + number
-            if int(number) > 31:
-                return number + "-" + month
-            else:
-                return month + "-" + number
+        if int(number)<10:
+            number= "0"+number
+        if int(number)>31:
+            return number + "-" + month
+        else:
+            return month + "-" + number
 
     #param- name of month
     #return the month number or  if its not a month
