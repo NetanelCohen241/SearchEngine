@@ -108,9 +108,17 @@ print(x.parse(terms,False))
 # "1,890 Dollars",
 # "450 56/90 Dollars",
 # "$559,000"]
+r=Reader.ReadFile("")
+with open("FB396001","r") as f:
+    ftxt=f.read()
+    t=time.time()
+    split=r.splitTags(ftxt)
+    # for i in split:
+        # print(i.toString())
+    # print(time.time()-t,len(split))
 #
-check=['60,000 dollars']
-x=Parse.Parser()
-for c in check:
-    print("orginal value: " + c," ==> ")
-    print(x.calcPrice(c.split(),0,False))
+# check=['1.76 dollars','60,000 dollars']
+# x=Parse.Parser()
+# for c in check:
+#     print("orginal value: " + c," ==> ")
+#     print(x.calcPrice(c.split(),0,False))
