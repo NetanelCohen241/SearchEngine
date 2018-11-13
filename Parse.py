@@ -239,6 +239,7 @@ class Parser:
     #     return re.match("([1-9]\/[1-9])", token)
 
     #return price term according price term rules
+    #change to push
     def calcPrice(self, tokens, i, flag):
 
         term = ""
