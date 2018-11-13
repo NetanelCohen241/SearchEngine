@@ -244,6 +244,7 @@ class Parser:
 
         term = ""
         fraction = " "
+
         sizes = {"m": 1000000, "million": 1000000, "billion": 1000000000, "bn": 1000000000, "trillion": 1000000000000}
         orginalToken = tokens[i]
         x = self.str_to_number(tokens[i])
@@ -271,7 +272,7 @@ class Parser:
                 term = str(int(x / sizes["million"])) + "M"
             else:
                 term = str(x / sizes["million"]) + "M"
-
+        i=i+1
         if flag:
             term += " Dollars"
         elif i + 1 < len(tokens) and tokens[i + 1].lower() == "dollars":
