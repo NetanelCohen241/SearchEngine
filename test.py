@@ -18,17 +18,70 @@ from bs4 import BeautifulSoup
 #         d[word] += 1
 #     print(d)
 
-r=Reader.ReadFile("")
-with open("FB396001","r") as f:
-    ftxt=f.read()
-    t=time.time()
-    split=r.splitTags(ftxt)
-    # for i in split:
-        # print(i.toString())
-    # print(time.time()-t,len(split))
-#
-# check=['1.76 dollars','60,000 dollars']
-# x=Parse.Parser()
-# for c in check:
-#     print("orginal value: " + c," ==> ")
-#     print(x.calcPrice(c.split(),0,False))
+# r=Reader.ReadFile("")
+# with open("FB396001","r") as f:
+#     ftxt=f.read()
+#     t=time.time()
+#     split=r.splitTags(ftxt)
+#     for i in split:
+#         print(i.toString())
+#     print(time.time()-t,len(split))
+# with open("FB396006", "r") as fin:
+#     txt=fin.read()
+#     # print(Reader.ReadFile.separeteTags(None,txt,"docno",False))
+#     with open("tes","w") as out:
+#         out.write("".join(txt.replace("</DOCNO>","<DOCNO>").split("<DOCNO>")))
+#         out.close()
+#     print(txt.split("<DOCNO>"))
+#below 1 million
+underM =[
+"1,890",
+"1303.043",
+"450 56/90",
+"559,000"
+]
+
+upM= [
+"23,987,123",
+"0.007 million",
+"55 billion",
+"1.8 trillion",
+# "9 m Dollars",
+"1.55 million",
+"0.7 trillion "
+]
+
+Ranges= [
+# "23,000,000-toys",
+# "$239-Million",
+# "100 million-toys",
+# "cash-45 million",
+"23,000,000 Dollars",
+"$23,987,000",
+    "1000.344",
+    "240 8/9",
+    "9/10"
+"$1.89 million",
+"$55 billion",
+"$1.8 trillion",
+"9 m Dollars",
+"1.76 bn Dollars",
+"6 billion U.S. dollars",
+"1.55 million U.S. dollars",
+"0.7 trillion U.S. dollars",
+# "55 billion-100 thousand"
+# "whats-up-baby",
+# "14 May 14 january June 1992 1.766 Dollars 5 3/4 Dollars 60,000 Dollars 5 bn Dollars 17 7/99 imNot-your/toy 222% 8787878 percent 800 Billion check 10,230,555,000,000 1010.56333 between 55,000 and 450,000 "
+]
+Range= [
+"1.89 trillion"
+]
+
+
+x=Parse.Parser()
+print("Ranges\n")
+terms=""
+for t in Ranges:
+    terms=terms+" "+t
+for t in Ranges:
+    print(x.parse(terms,False))
