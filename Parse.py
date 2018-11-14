@@ -45,8 +45,10 @@ class Parser:
             elif tokens[i].endswith("%", len(tokens[i]) - 1):
                 tokens[i] = tokens[i].replace('%', '')
                 if self.isNumber(tokens[i]):
-                    i, term = self.calcSize(tokens, i)
-                    term += "%"
+                    i,term= self.calcSize(tokens,i)
+                    term+="%"
+            elif self.isFraction(tokens[i]):
+                term=tokens[i]
             # Number
             elif self.isNumber(tokens[i]):
 
