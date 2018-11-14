@@ -275,7 +275,7 @@ class Parser:
                 alreadyAdd=True
             else:
                 term = orginalToken + " Dollars"
-                if i + 1 < len(tokens) and tokens[i + 1] == 'dollars':
+                if i + 1 < len(tokens) and tokens[i + 1].lower() == 'dollars':
                     i = i + 1
 
 
@@ -302,10 +302,3 @@ class Parser:
         for token in tokens:
             terms.append(ps.stem(token))
         return terms
-
-
-
-
-
-
-
