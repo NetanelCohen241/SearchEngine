@@ -12,16 +12,19 @@ class ReadFile(object):
         if not os.path.isdir("documents"):
             os.mkdir("documents")
 
-    def startAction(self):
-        self.scanDir(os.listdir(self.path))
+    def startAction(self,howManyFiles):
+        return self.scanDir(os.listdir(self.path),howManyFiles)
 
-    def scanDir(self, dirList):
-        for dirName in dirList:
-            with open(self.path + "/" + dirName + "/" + dirName,"r") as fin:
-                y= fin.read()
-                docList=re.findall(r"<DOC.*?>(.*?)</DOC>",y,re.DOTALL)
-                docNames=re.findall(r"<DOCNO.*?>(.*?)</DOCNO>",y,re.DOTALL)
-                self.makeFiles(docList,docNames)
+    def scanDir(self, dirList, howManyFiles):
+        ans=[]
+        for i in range(howManyFiles):
+            with open(self.path + "/" + dirList[i] + "/" + dirList[i],"r") as fin:
+                txt= fin.read()
+                ans.extend(self.splitTags(txt))
+                # docList=re.findall(r"<DOC.*?>(.*?)</DOC>",y,re.DOTALL)
+                # docNames=re.findall(r"<DOCNO.*?>(.*?)</DOCNO>",y,re.DOTALL)
+                # self.makeFiles(docList,docNames)
+        return ans
 
     def makeFiles(self, docsContent, docNames):
 
@@ -32,7 +35,7 @@ class ReadFile(object):
 
     def separeteTags(self,txt, tag, returnWithoutTag):
         """
-        this method separete txt throw its givaen tag for exsample:
+        this method separate txt throw its given tag for example:
         <TEXT>
             this is text
         </TEXT>

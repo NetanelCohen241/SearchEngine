@@ -19,18 +19,17 @@ class Parser:
         terms = []
 
         tokens = (str(text).replace(':', '').replace('"', '').replace('!', '').replace('?', '').replace('*', '')
-                  .replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}',
-                                                                                                                '').split(
-            ' '))
+                  .replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}','')
+                  .replace('\n','').split(' '))
         with open("stop_words.txt", "r") as sw:
             stopWords = sw.read();
         while i < len(tokens):
             term = ""
-            if tokens[i] in stopWords:
+            if tokens[i].lower() in stopWords:
                 i = i + 1
                 continue
             # Price
-            if tokens[i].startswith("$", 0, 1):
+            if tokens[i].startswith("$", 0, 1) and self.isNumber(tokens[i][1:]):
                 tokens[i] = tokens[i].replace('$', '')
                 if '-' in tokens[i]:
                     j, term = self.calcPrice(tokens[i].replace('-', ' ').split(' '), 0, True)
@@ -91,6 +90,9 @@ class Parser:
                             if mon is not "0":
                                 term = self.dateFormat(mon, tokens[i])
                                 i = i + 1
+                            elif tokens[i+1].replace(",",'') == "GMT":
+                                term=tokens[i+1][:2]+":"+tokens[i+1][2:]
+                                i=i+1
                             else:
                                 i, term = self.calcSize(tokens, i)
                     else:
@@ -125,17 +127,24 @@ class Parser:
                         t2 = rangeTokens[1]
                         if self.isNumber(rangeTokens[0]):
                             # Number -
-                            j, t1 = self.calcSize(rangeTokens, 0)
+                            if rangeTokens[0].startswith('0'):
+                                t1=rangeTokens[0][:2]+":"+rangeTokens[0][2:]
+                            else:
+                                j, t1 = self.calcSize(rangeTokens, 0)
                             if rangeTokens[1] == "percent":
                                 term = rangeTokens[0] + "%"
 
                         if self.isNumber(rangeTokens[1]):
                             # - Number
-                            if i + 1 < len(tokens) and tokens[i + 1].lower() in size:
+                            if rangeTokens[1].startswith('0'):
+                                t2=rangeTokens[1][:2]+":"+rangeTokens[1][2:]
+                                if i + 1 < len(tokens) and tokens[i + 1].replace(",",'')=="GMT":
+                                    i=i+1
+                            elif i + 1 < len(tokens) and tokens[i + 1].lower() in size:
                                 j, t2 = self.calcSize([rangeTokens[1], tokens[i + 1]], 0)
                                 i = i + 1
                             else:
-                                j, t2 = self.calcSize(rangeTokens[1], 0)
+                                j, t2 = self.calcSize([rangeTokens[1]], 0)
                         # add to terms list range right value and range left value
                         terms.extend([t1, t2])
                         if term == "":
@@ -169,6 +178,7 @@ class Parser:
         change the sizes to K/M/B
         and return the last index the function work on
         """
+        # print(tokens[i])
         term = ""
         fraction = " "
         sizes = {"thousand": 1000, "million": 1000000, "billion": 1000000000, "trillion": 1000000000000}
