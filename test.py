@@ -1,6 +1,5 @@
 from collections import defaultdict
 
-import bs4
 import nltk
 
 import Doc
@@ -9,8 +8,6 @@ import Reader
 import re
 import time
 import  Parse
-from bs4 import BeautifulSoup
-
 # d = defaultdict(int)
 # with open("FB396001",'r') as f:
 #     txt=f.read()
@@ -82,17 +79,17 @@ terms=""
 for t in Ranges:
     terms=terms+" "+t
 
-# print(x.parse("028",False))
-# print(x.calcPrice(["1.89","Dollars"],0,True))
+# print(x.parse("22/13 33/55",False))
+# print(x.calcSize(["33/55"],0))
 
-
-r=Reader.ReadFile("D:\iretrival\corpus")
+#
+r=Reader.ReadFile("C:\\Users\Daniel\Desktop\לימודים\שנה ג\אחזור מידע\פרויקט מנוע חלק א\corpus\corpus")
 t=time.time()
 list=r.startAction(500)
 ans=[]
 i=0
 for doc in list:
-    ans.extend(x.parse(doc.txt,False))
+    ans.extend(x.parse("065",False))
     # print(i)
     i+=1
 print(time.time()-t)

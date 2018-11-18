@@ -158,6 +158,7 @@ class Parser:
                 terms.append(term)
                 i = i + 1
         except:
+            print(tokens[i])
             x=5
 
 
@@ -187,6 +188,8 @@ class Parser:
         # print(tokens[i])
         term = ""
         fraction = ""
+        if self.isFraction(tokens[i]):
+            return i,tokens[i]
         sizes = {"thousand": 1000, "million": 1000000, "billion": 1000000000, "trillion": 1000000000000}
         if tokens[i].startswith('0'):
             tokens[i]=tokens[i][1:]
@@ -279,6 +282,8 @@ class Parser:
         term = ""
         fraction = " "
         alreadyAdd=False
+        if tokens[i].startswith("0"):
+            tokens[i]=tokens[i][1:]
         sizes = {"m": 1000000, "million": 1000000, "billion": 1000000000, "bn": 1000000000, "trillion": 1000000000000}
         orginalToken = tokens[i]
         x = self.str_to_number(tokens[i])
