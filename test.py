@@ -82,17 +82,17 @@ terms=""
 for t in Ranges:
     terms=terms+" "+t
 
-# print(x.parse("0600",False))
+# print(x.parse("028",False))
 # print(x.calcPrice(["1.89","Dollars"],0,True))
 
 
 r=Reader.ReadFile("D:\iretrival\corpus")
 t=time.time()
-list=r.startAction(100)
+list=r.startAction(500)
 ans=[]
 i=0
 for doc in list:
     ans.extend(x.parse(doc.txt,False))
-    print(i)
+    # print(i)
     i+=1
 print(time.time()-t)
