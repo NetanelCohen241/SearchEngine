@@ -21,16 +21,20 @@ class Parser:
         tokens = (str(text).replace(':', '').replace('"', '').replace('!', '').replace('?', '').replace('*', '')
                   .replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}','')
                   .replace('\n','').replace('|','').split(' '))
-        try:
-            with open("stop_words.txt", "r") as sw:
-                stopWords = sw.read();
-            while i < len(tokens):
-                term = ""
-                if tokens[i].lower() in stopWords:
+
+        with open("stop_words.txt", "r") as sw:
+            stopWords = sw.read();
+        while i < len(tokens):
+            term = ""
+            try:
+                if tokens[i].lower() in stopWords or tokens[i]=="":
                     i = i + 1
                     continue
+                if tokens[i]=="0":
+                    term=tokens[i]
+
                 # Price
-                if tokens[i].startswith("$", 0, 1) and self.isNumber(tokens[i][1:]):
+                elif tokens[i].startswith("$", 0, 1) and self.isNumber(tokens[i][1:]):
                     tokens[i] = tokens[i].replace('$', '')
                     if '-' in tokens[i]:
                         j, term = self.calcPrice(tokens[i].replace('-', ' ').split(' '), 0, True)
@@ -38,7 +42,7 @@ class Parser:
                         j, term = self.calcPrice([tokens[i], tokens[i + 1]], 0, True)
                         i += j
                     else:
-                        j, term = self.calcPrice(tokens[i], 0, True)
+                        j, term = self.calcPrice([tokens[i]], 0, True)
 
 
                 # Percent
@@ -155,11 +159,13 @@ class Parser:
                     else:
                         tokens[i].replace(',', '').replace('.', '')
                         term = tokens[i]
-                terms.append(term)
-                i = i + 1
-        except:
-            print(tokens[i])
-            x=5
+            except:
+                term = tokens[i]
+            terms.append(term)
+            i = i + 1
+
+            # print(i,x[i])
+            # print(x[i])
 
 
         if withStemming is True:
@@ -190,9 +196,9 @@ class Parser:
         fraction = ""
         if self.isFraction(tokens[i]):
             return i,tokens[i]
+        if tokens[i].startswith('0') and tokens[i].isdigit():
+            return i,tokens[i]
         sizes = {"thousand": 1000, "million": 1000000, "billion": 1000000000, "trillion": 1000000000000}
-        if tokens[i].startswith('0'):
-            tokens[i]=tokens[i][1:]
         x = self.str_to_number(tokens[i])
         if i+1 < len(tokens):
             if sizes.__contains__(tokens[i+1].lower()):
@@ -282,8 +288,9 @@ class Parser:
         term = ""
         fraction = " "
         alreadyAdd=False
-        if tokens[i].startswith("0"):
-            tokens[i]=tokens[i][1:]
+        if tokens[i].startswith('0') and tokens[i].isdigit():
+            return i, tokens[i]
+
         sizes = {"m": 1000000, "million": 1000000, "billion": 1000000000, "bn": 1000000000, "trillion": 1000000000000}
         orginalToken = tokens[i]
         x = self.str_to_number(tokens[i])
