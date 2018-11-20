@@ -20,19 +20,24 @@ class Parser:
 
         tokens = (str(text).replace(':', '').replace('"', '').replace('!', '').replace('?', '').replace('*', '')
                   .replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}','')
-                  .replace('\n','').replace('|','').split(' '))
+                  .replace('\n','').replace('|','').replace('\'','').replace('^','').replace('*','').replace('@','')
+                  .replace('`','').replace('>',' ').replace('<',' ').replace(';','').replace('--','').split(' '))
 
         with open("stop_words.txt", "r") as sw:
             stopWords = sw.read();
+        sw.close()
         while i < len(tokens):
-            term = ""
+
             try:
-                if tokens[i].lower() in stopWords or tokens[i]=="":
+                if tokens[i].lower() in stopWords or tokens[i] in ['-',"--",',','.','']:
                     i = i + 1
                     continue
                 if tokens[i]=="0":
                     term=tokens[i]
 
+                if tokens[i].endswith(',') or tokens[i].endswith('.'):
+                    tokens[i]=tokens[i].replace(',','').replace('.','')
+                    term = tokens[i]
                 # Price
                 elif tokens[i].startswith("$", 0, 1) and self.isNumber(tokens[i][1:]):
                     tokens[i] = tokens[i].replace('$', '')
@@ -57,13 +62,14 @@ class Parser:
                 elif self.isNumber(tokens[i]):
 
                     # Percent
-                    if i + 1 < len(tokens) and (tokens[i + 1] == "percent" or tokens[i + 1] == "percentage"):
+                    if i + 1 < len(tokens) and (tokens[i + 1].lower().replace(',','').replace('.','') == "percent" or
+                                                tokens[i + 1].lower().replace(',','').replace('.','') == "percentage"):
                         i, term = self.calcSize(tokens, i)
                         term += '%'
                         i = i + 1
                     # Price
-                    elif (i + 1 < len(tokens) and tokens[i + 1] == "Dollars") or (
-                            i + 2 < len(tokens) and (tokens[i + 2] == "Dollars" or tokens[i + 2] == "U.S.")):
+                    elif (i + 1 < len(tokens) and tokens[i + 1].lower().replace(',','').replace('.','') == "dollars") or \
+                            (i + 2 < len(tokens) and (tokens[i + 2].lower().replace(',','').replace('.','') == "dollars" or tokens[i + 2] == "U.S.")):
                         i, term = self.calcPrice(tokens, i, False)
                     # Number(only size)
                     else:
@@ -157,8 +163,7 @@ class Parser:
                             if term == "":
                                 term = t1 + "-" + t2
                     else:
-                        tokens[i].replace(',', '').replace('.', '')
-                        term = tokens[i]
+                        term = tokens[i].replace(',', '').replace('.', '')
             except:
                 term = tokens[i]
             terms.append(term)

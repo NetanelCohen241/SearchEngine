@@ -10,18 +10,19 @@ class ReadFile(object):
         if not os.path.isdir("documents"):
             os.mkdir("documents")
 
-    def startAction(self,howManyFiles):
-        return self.scanDir(os.listdir(self.path),howManyFiles)
+    def startAction(self,start,howManyFiles):
+        return self.scanDir(os.listdir(self.path),start,howManyFiles)
 
-    def scanDir(self, dirList, howManyFiles):
+    def scanDir(self, dirList, start, howManyFiles):
         ans=[]
-        for i in range(howManyFiles):
+        for i in range(start,start+howManyFiles):
             with open(self.path + "/" + dirList[i] + "/" + dirList[i],"r") as fin:
                 txt= fin.read()
                 ans.extend(self.splitTags(txt))
                 # docList=re.findall(r"<DOC.*?>(.*?)</DOC>",y,re.DOTALL)
                 # docNames=re.findall(r"<DOCNO.*?>(.*?)</DOCNO>",y,re.DOTALL)
                 # self.makeFiles(docList,docNames)
+            fin.close()
         return ans
 
     def makeFiles(self, docsContent, docNames):
