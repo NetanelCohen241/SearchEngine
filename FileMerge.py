@@ -85,22 +85,21 @@ class Merger(object):
         fileName = self.filesToMergePath + '/' + self.filesNames[fileNumber]
         keys = []
         values = []
-        line=""
-        for i in range(start, howManyToRead):
-            try:
-                line = linecache.getline(fileName, i+1)
-            except:
-                print (fileName)
-                print(i+1)
-            if line == "":
-                self.pointers[fileNumber]=-1
-            tmp = line.split(':')
-            try:
-                keys.append(tmp[0])
-                values.append(tmp[1])
-            except:
-                print(line)
-
+        if start < 0: return ''
+        current_line_number = 0
+        for line in open(fileName):
+            if current_line_number >= start:
+                tmp = line.split(':')
+                try:
+                    keys.append(tmp[0])
+                    values.append(tmp[1])
+                except:
+                    print(line)
+            current_line_number += 1
+            if current_line_number==start+howManyToRead:
+                break
+        if current_line_number != start+howManyToRead:
+            self.pointers[fileNumber]=-1
         return [keys, values]
 
     def findMin(self, terms):

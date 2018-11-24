@@ -36,7 +36,6 @@ class Index(object):
 
     def insertToPostingList(self, postingList, docDictionary,doc):
 
-        # for key, value in transaction.items():
         for key in docDictionary.keys():
             value=docDictionary[key]
             if postingList.__contains__(key):

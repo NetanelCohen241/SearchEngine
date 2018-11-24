@@ -1,7 +1,11 @@
 import linecache
 import multiprocessing
 from multiprocessing import Pool
-import sys
+# import sys
+
+import os
+import os.path
+
 import Indexer
 import time
 import  Parse
@@ -55,13 +59,18 @@ def index(pid):
 # print(time.time()-t)
 linecache.clearcache()
 line = linecache.getline("testread.txt", 208)
-print (sys.path)
-print(line)
+
+#
+#
+# for dirpath, dirnames, filenames in os.walk("."):
+#     # print(dirnames)
+#     # print(dirpath)
+#     print(filenames)
 #
 if __name__ == '__main__':
 
     xx=5
-    # processes = []
+    processes = []
     # for pid in range(30,33):
     #     p = multiprocessing.Process(target=index, args=(pid,))
     #     processes.append(p)
@@ -69,15 +78,15 @@ if __name__ == '__main__':
     #
     # for process in processes:
     #     process.join()
-    # numbers=[]
-    # for i in range(0,36):
-    #     numbers.append(i)
-    # starttime = time.time()
-    # pool = Pool(processes=(multiprocessing.cpu_count()-1))
-    # pool.map(index, numbers)
-    # print(time.time()-starttime)
-    #
+    numbers=[]
+    for i in range(0,36):
+        numbers.append(i)
+    starttime = time.time()
+    pool = Pool(processes=(multiprocessing.cpu_count()-1))
+    pool.map(index, numbers)
+    print(time.time()-starttime)
 
+    #
     # starttime = time.time()
     # merger=FileMerge.Merger("D:\iretrival\posting",200)
     # merger.merge()

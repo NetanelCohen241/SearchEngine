@@ -1,11 +1,10 @@
 import ast
-import nltk
 import re
+# import stemmer
 from nltk.stem import PorterStemmer
 
 months = ["january", "jan", "february", "feb", "march", "mar", "april", "apr", "may", "may", "june", "jun", "july",
-          "jul",
-          "august", "aug", "september", "sep", "october", "oct", "november", "nov", "december", "dec"]
+          "jul","august", "aug", "september", "sep", "october", "oct", "november", "nov", "december", "dec"]
 
 size = ["trillion", "billion", "million", "thousand"]
 
@@ -198,11 +197,10 @@ class Parser(object):
 
         i = 0
 
-        tokens = (str(text).replace(':', '').replace('"', '').replace('!', '').replace('?', '').replace('*', '')
+        tokens = (str(text).replace(':', '').replace('#','').replace('&','').replace('"', '').replace('!', '').replace('?', '').replace('*', '')
                   .replace('(', '').replace(')', '').replace('[', '').replace(']', '').replace('{', '').replace('}', '')
-                  .replace('\n', '').replace('|', '').replace('\'', '').replace('^', '').replace('*', '').replace('@',
-                                                                                                                  '')
-                  .replace('`', '').replace('>', ' ').replace('<', ' ').replace(';', '').replace('--', '').split(' '))
+                  .replace('\n', '').replace('|', '').replace('\'', '').replace('^', '').replace('*', '').replace('@','')
+                  .replace('`', '').replace('+','').replace('>', ' ').replace('<', ' ').replace(';', '').replace('--', '').split(' '))
 
         with open("stop_words.txt", "r") as sw:
             stopWords = sw.read();
