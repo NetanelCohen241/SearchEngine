@@ -42,15 +42,30 @@ class ReadFile(object):
         """
         ans = []
         docList = txt.split("</DOC>\n\n<DOC>")
+        docCity=[]
         for i in docList:
             docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0]
             if i.__contains__("<F"):
                 docCity = re.findall(r'<F P=104>(.*?)</F>', i)
                 if len(docCity) > 0 and docCity[0] != "":
                     docCity = docCity[0].split()[0].upper()
-            else:
-                docCity = ""
+                    print(docCity)
+                else:
+                    docCity = ""
             textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]
             doc = Doc.Document(docNumber, textContent, docCity)
+            if doc.city != "" and docCity!=[]:
+                self.find_all_locations_in_text(doc)
+
             ans.append(doc)
         return ans
+
+    def find_all_locations_in_text(self, doc):
+        text=doc.txt.lower()
+        start = 0
+        while True:
+            start = text.find(doc.city.lower(), start)
+            if start == -1:
+                break
+            doc.cityLocations.append(start)
+            start += len(doc.city)
