@@ -4,7 +4,7 @@ import linecache
 
 class Merger(object):
 
-    def __init__(self, filesToMergePath,chunkSize):
+    def __init__(self, filesToMergePath, chunkSize):
 
         self.filesToMergePath = filesToMergePath
         self.chunkSize = chunkSize
@@ -13,32 +13,25 @@ class Merger(object):
         self.chunksListToMerge = []
         self.filesNames = os.listdir(self.filesToMergePath)
         self.pointers = []
-        open("mergedContent.txt", "w+")
+        open("postingTmp.txt", "w+")
         open("dictionary.txt", "w+")
-
-
 
     def merge(self):
         """
-        This function merge the files into one sorted file-posting list
+        This function merge the files into one sorted file - posting list
         :return:
         """
 
         terms = []
         self.uploadAllFilesChunks()
-        #insert into terms list the first term from each chunk
+        # insert into terms list the first term from each chunk
         for i in range(0, len(self.chunksListToMerge)):
-            try:
-                x=(self.chunksListToMerge[i][0][0])
-            except:
-                y=8
-                print(y)
             terms.append(self.chunksListToMerge[i][0][self.pointers[i]])
 
         self.startMerge(terms)
         self.writeMergeContentToDisk()
-
-
+        self.clearUpperCase()
+        self.writeDictionaryToDisk()
 
     def startMerge(self, terms):
         """
@@ -51,31 +44,31 @@ class Merger(object):
         :param terms:
         :return:
         """
-        postingListPointer=1
+        postingListPointer = 1
         while not self.hasFinished():
 
             minTermIdx = self.findMin(terms)
-            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx]%self.chunkSize]
+            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx] % self.chunkSize]
             self.postingBlock[term] = ""
-            #iterate over each chunk, in every chunk that the term exists, append its content to postingBlock
+            # iterate over each chunk, in every chunk that the term exists, append its content to postingBlock
             for i in range(0, len(self.chunksListToMerge)):
-                #check if we already uploaded the all file
-                if self.pointers[i]==-1:
+                # check if we already uploaded the all file
+                if self.pointers[i] == -1:
                     continue
-                pos= self.pointers[i]%self.chunkSize
+                pos = self.pointers[i] % self.chunkSize
                 if self.chunksListToMerge[i][0][pos] == term:
                     self.postingBlock[term] += self.chunksListToMerge[i][1][pos]
                     self.pointers[i] += 1
                     if self.pointers[i] % self.chunkSize == 0:
                         self.uploadFileChunk(i)
-                    if self.pointers[i]!=-1:
-                        terms[i] = self.chunksListToMerge[i][0][self.pointers[i]%self.chunkSize]\
+                    if self.pointers[i] != -1:
+                        terms[i] = self.chunksListToMerge[i][0][self.pointers[i] % self.chunkSize]
 
-            self.dictionary[term] = postingListPointer
-            postingListPointer+=1
-            if postingListPointer%100000==0:
+            self.AddToDictionary(term, postingListPointer)
+
+            postingListPointer += 1
+            if postingListPointer % 100000 == 0:
                 self.writeMergeContentToDisk()
-
 
     def uploadAllFilesChunks(self):
 
@@ -83,7 +76,6 @@ class Merger(object):
             self.chunksListToMerge.append(0)
             self.pointers.append(0)
             self.uploadFileChunk(i)
-
 
     def uploadFileChunk(self, fileNumber):
 
@@ -107,12 +99,12 @@ class Merger(object):
             if current_line_number >= start:
                 tmp = line.split(':')
                 keys.append(tmp[0])
-                values.append(tmp[1].replace('\n',''))
+                values.append(tmp[1].replace('\n', ''))
             current_line_number += 1
-            if current_line_number==start+howManyToRead:
+            if current_line_number == start + howManyToRead:
                 break
-        if current_line_number != start+howManyToRead:
-            self.pointers[fileNumber]=-1
+        if current_line_number != start + howManyToRead:
+            self.pointers[fileNumber] = -1
         return [keys, values]
 
     def findMin(self, terms):
@@ -124,34 +116,67 @@ class Merger(object):
         min = 0
         i = 0
         while i < len(terms):
-            if self.pointers[i]!=-1 and terms[i] < terms[min]:
+            if self.pointers[i] != -1 and terms[i] < terms[min]:
                 min = i
-            i+=1
+            i += 1
         return min
 
     def hasFinished(self):
 
         ans = True
         for i in range(len(self.pointers)):
-            if self.pointers[i]!=-1:
-                ans= False
+            if self.pointers[i] != -1:
+                ans = False
                 break
         return ans
 
     def writeMergeContentToDisk(self):
 
-        with open("mergedContent.txt", "a+") as out:
-
+        with open("postingTmp.txt", "a+") as out:
             for key in self.postingBlock.keys():
-                out.write(key+ ":")
-                out.write(self.postingBlock[key]+'\n')
+                out.write(key + ":")
+                out.write(self.postingBlock[key] + '\n')
         out.close()
-        self.postingBlock={}
+        self.postingBlock = {}
+
+    def writeDictionaryToDisk(self):
         with open("dictionary.txt", "a+") as out:
-
             for key in self.dictionary.keys():
-                out.write(key+ " : ")
-                out.write(str(self.dictionary[key])+'\n')
+                out.write(key + " : ")
+                out.write(str(self.dictionary[key]) + '\n')
         out.close()
-        self.dictionary={}
 
+    def AddToDictionary(self, term, postingListPointer):
+
+        if term[0].isupper():
+            if self.dictionary.__contains__(term.lower()):
+                # self.postingBlock[term.lower()]+= self.postingBlock[term]
+                del self.postingBlock[term]
+            else:
+                term = term.upper()
+                self.dictionary[term] = postingListPointer
+        else:
+            if term.islower() and self.dictionary.__contains__(term.upper()):
+                self.dictionary[term.upper()] *= -1
+            else:
+                self.dictionary[term] = postingListPointer
+
+    def clearUpperCase(self):
+
+        with open("posting.txt", "w+") as out:
+
+            i = 1
+            tmpDict = {}
+            postingBlock = {}
+            tmp=[]
+            for key in self.dictionary:
+                if self.dictionary[key] < 0:
+                    pointer = self.dictionary[key] * (-1)
+                    upperLine = linecache.getline("postingTmp.txt", pointer).split(':')[1]
+                    lowerLine = linecache.getline("postingTmp.txt", self.dictionary[key.lower()])
+                    lowerLine += upperLine.replace('\n', '')
+
+                out.write(line)
+                i += 1
+
+        out.close()

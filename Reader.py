@@ -19,9 +19,6 @@ class ReadFile(object):
             with open(self.path + "/" + dirList[i] + "/" + dirList[i],"r") as fin:
                 txt= fin.read()
                 ans.extend(self.splitTags(txt))
-                # docList=re.findall(r"<DOC.*?>(.*?)</DOC>",y,re.DOTALL)
-                # docNames=re.findall(r"<DOCNO.*?>(.*?)</DOCNO>",y,re.DOTALL)
-                # self.makeFiles(docList,docNames)
             fin.close()
         return ans
 

@@ -4,6 +4,16 @@ class Document:
         self.txt=txt
         self.city=city
         self.cityLocations=[]
+        self.numOfUniqeTerms=0
+        self.maxTf=0
+
+    def setMaxtf(self,max_tf):
+        self.maxTf=max_tf
+
+    def setNumOfUniqeTerms(self, numOfUniqeTerms):
+        self.numOfUniqeTerms=numOfUniqeTerms
+
     def toString(self):
-        return "Number: {0}\nCity: {1}\n Text: {2}".format(self.docNumber,self.city,self.txt)
+        return "{0}            {1}            {2}             {3}    {4}"\
+                .format(self.docNumber,self.city,self.cityLocations,self.numOfUniqeTerms ,self.maxTf)
 

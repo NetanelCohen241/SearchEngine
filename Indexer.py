@@ -19,13 +19,14 @@ class Index(object):
     def __init__(self,corpusPath,postingListPath):
         self.corpusPath=corpusPath
         self.postingListPath=postingListPath
+        # self.docs=[]
 
     def createIndex(self,withStemming,pid):
         """
         This function creates an inverted index.
         :param withStemming: determines whether do stemming or not
-        :param pid:
-        :return:
+        :param pid: number of chunk to read.
+        :return: a dictionary: key=term, value= how many the term appeared in the doc(tf)
         """
         postingList = {}
         blockSize=40
@@ -35,8 +36,10 @@ class Index(object):
 
         for doc in docList:
             docDictionary=parser.parse(doc.txt,withStemming)
+            doc.setNumOfUniqeTerms(len(docDictionary.keys()))
+            doc.setMaxtf(self.calcMaxTf(docDictionary))
             self.insertToPostingList(postingList,docDictionary,doc)
-
+        self.writeDocsToDick(docList,pid)
         self.writePostingListToDisk(postingList,pid)
 
 
@@ -52,7 +55,7 @@ class Index(object):
 
     def writePostingListToDisk(self, postingList, pid):
 
-        with open(self.postingListPath +'/' +"test" + str(pid) + ".txt", "w+") as out:
+        with open(self.postingListPath +'/' +"posting" + str(pid) + ".txt", "w+") as out:
 
             for key in sorted(postingList.keys()):
                 out.write(key+ ":")
@@ -60,6 +63,26 @@ class Index(object):
                     out.write(element.toString()+ " " )
                 out.write("\n")
         out.close()
+
+    def calcMaxTf(self, docDictionary):
+
+        keys=docDictionary.keys()
+        max=0
+        for key in keys:
+            if docDictionary[key]> max:
+                max=docDictionary[key]
+
+        return max
+
+    def writeDocsToDick(self, docList,pid):
+
+        with open(self.postingListPath +'/' +"docs" + str(pid) + ".txt", "w+") as out:
+            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
+            for doc in docList:
+                out.write(doc.toString()+"\n")
+        out.close()
+
+
 
 
 

@@ -3,6 +3,7 @@ class model(object):
 
     def __init__(self):
         self.data = 5
+        open("docs.txt", "w+")
 
     def dat(self):
         return self.data

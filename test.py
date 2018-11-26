@@ -67,7 +67,8 @@ line = linecache.getline("testread.txt", 208)
 #     # print(dirpath)
 #     print(filenames)
 
-print("hello")
+z=sorted(["A","a","B"])
+print(z)
 
 if __name__ == '__main__':
 
@@ -83,10 +84,10 @@ if __name__ == '__main__':
     numbers=[]
     for i in range(0,45):
         numbers.append(i)
-    starttime = time.time()
-    pool = Pool(processes=(multiprocessing.cpu_count())-1)
-    pool.map(index, numbers)
-    print(time.time()-starttime)
+    # starttime = time.time()
+    # pool = Pool(processes=(multiprocessing.cpu_count())-1)
+    # pool.map(index, numbers)
+    # print(time.time()-starttime)
 
     # starttime = time.time()
     # for i in range(len(numbers)):
@@ -94,10 +95,10 @@ if __name__ == '__main__':
     # print(time.time() - starttime)
 
     #
-    starttime = time.time()
-    merger=FileMerge.Merger("D:\iretrival\posting",2000)
-    merger.merge()
-    print(time.time() - starttime)
+    # starttime = time.time()
+    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
+    # merger.merge()
+    # print(time.time() - starttime)
 
 
 
