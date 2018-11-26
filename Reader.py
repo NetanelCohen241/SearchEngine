@@ -14,6 +14,13 @@ class ReadFile(object):
         return self.scanDir(os.listdir(self.path),start,howManyFiles)
 
     def scanDir(self, dirList, start, howManyFiles):
+        """
+        This function
+        :param dirList: list of all directories
+        :param start: from which
+        :param howManyFiles:
+        :return:
+        """
         ans=[]
         for i in range(start,start+howManyFiles):
             with open(self.path + "/" + dirList[i] + "/" + dirList[i],"r") as fin:

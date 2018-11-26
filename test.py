@@ -1,7 +1,7 @@
 import linecache
 import multiprocessing
 from multiprocessing import Pool
-# import sys
+
 
 import os
 import os.path
@@ -70,6 +70,17 @@ line = linecache.getline("testread.txt", 208)
 z=sorted(["A","a","B"])
 print(z)
 
+
+# count=0
+# dir=os.listdir("D:\iretrival\posting")
+# for doc in dir:
+#     with open("D:\iretrival\posting/"+doc,"r")as fin:
+#         count+=len(fin.readlines())
+#
+# print(count)
+
+
+
 if __name__ == '__main__':
 
     xx=5
@@ -95,10 +106,10 @@ if __name__ == '__main__':
     # print(time.time() - starttime)
 
     #
-    # starttime = time.time()
-    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
-    # merger.merge()
-    # print(time.time() - starttime)
+    starttime = time.time()
+    merger=FileMerge.Merger("D:\iretrival\posting",2000)
+    merger.merge()
+    print(time.time() - starttime)
 
 
 

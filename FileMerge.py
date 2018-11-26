@@ -29,7 +29,7 @@ class Merger(object):
             terms.append(self.chunksListToMerge[i][0][self.pointers[i]])
 
         self.startMerge(terms)
-        self.writeMergeContentToDisk()
+        self.writeMergeContentToDisk("postingTmp.txt")
         self.clearUpperCase()
         self.writeDictionaryToDisk()
 
@@ -48,7 +48,11 @@ class Merger(object):
         while not self.hasFinished():
 
             minTermIdx = self.findMin(terms)
-            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx] % self.chunkSize]
+            try:
+                term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx] % self.chunkSize]
+            except:
+                print(self.pointers)
+                # print( self.chunksListToMerge[minTermIdx][0])
             self.postingBlock[term] = ""
             # iterate over each chunk, in every chunk that the term exists, append its content to postingBlock
             for i in range(0, len(self.chunksListToMerge)):
@@ -57,6 +61,7 @@ class Merger(object):
                     continue
                 pos = self.pointers[i] % self.chunkSize
                 if self.chunksListToMerge[i][0][pos] == term:
+                    #append term content to posting list
                     self.postingBlock[term] += self.chunksListToMerge[i][1][pos]
                     self.pointers[i] += 1
                     if self.pointers[i] % self.chunkSize == 0:
@@ -68,10 +73,13 @@ class Merger(object):
 
             postingListPointer += 1
             if postingListPointer % 100000 == 0:
-                self.writeMergeContentToDisk()
+                self.writeMergeContentToDisk("postingTmp.txt")
 
     def uploadAllFilesChunks(self):
-
+        """
+        This function upload chunk(of lines) from each file(postinglist
+        :return:
+        """
         for i in range(len(self.filesNames)):
             self.chunksListToMerge.append(0)
             self.pointers.append(0)
@@ -130,9 +138,12 @@ class Merger(object):
                 break
         return ans
 
-    def writeMergeContentToDisk(self):
-
-        with open("postingTmp.txt", "a+") as out:
+    def writeMergeContentToDisk(self,fileName):
+        """
+        This function writes the posting list into the disc
+        :return:
+        """
+        with open(fileName, "a+") as out:
             for key in self.postingBlock.keys():
                 out.write(key + ":")
                 out.write(self.postingBlock[key] + '\n')
@@ -140,6 +151,10 @@ class Merger(object):
         self.postingBlock = {}
 
     def writeDictionaryToDisk(self):
+        """
+        This function writes the dictionary into the disc
+        :return:
+        """
         with open("dictionary.txt", "a+") as out:
             for key in self.dictionary.keys():
                 out.write(key + " : ")
@@ -148,10 +163,10 @@ class Merger(object):
 
     def AddToDictionary(self, term, postingListPointer):
 
-        if term[0].isupper():
+        if term=="" or str(term)[0].isupper():
             if self.dictionary.__contains__(term.lower()):
                 # self.postingBlock[term.lower()]+= self.postingBlock[term]
-                del self.postingBlock[term]
+                self.dictionary[term.upper()] *= -1
             else:
                 term = term.upper()
                 self.dictionary[term] = postingListPointer
@@ -162,21 +177,32 @@ class Merger(object):
                 self.dictionary[term] = postingListPointer
 
     def clearUpperCase(self):
+        """
+        This function responsible to merge term that appear multiple times in dictionary in different forms,
+        for example: one time in uppercase and another time with lowercase.
+        After the merge, it update the new pointers for each term in dictionary
+        :return:
+        """
+        postingBlock = {}
+        for key in self.dictionary:
+            if self.dictionary[key] < 0:
+                pointer = self.dictionary[key] * (-1)
+                upperLine = linecache.getline("postingTmp.txt", pointer).split(':')[1]
+                lowerLine = linecache.getline("postingTmp.txt", self.dictionary[key.lower()])
+                lowerLine += upperLine.replace('\n','')
+                tmp=lowerLine.split(':')
+                postingBlock[tmp[0]]=tmp[1]
+                del self.dictionary[key]
 
         with open("posting.txt", "w+") as out:
-
             i = 1
-            tmpDict = {}
-            postingBlock = {}
-            tmp=[]
+            keys=postingBlock.keys()
             for key in self.dictionary:
-                if self.dictionary[key] < 0:
-                    pointer = self.dictionary[key] * (-1)
-                    upperLine = linecache.getline("postingTmp.txt", pointer).split(':')[1]
-                    lowerLine = linecache.getline("postingTmp.txt", self.dictionary[key.lower()])
-                    lowerLine += upperLine.replace('\n', '')
-
+                line = linecache.getline("postingTmp.txt", i)
+                if line.split(':')[0] in keys:
+                    line= key +":"+postingBlock[key]
                 out.write(line)
+                self.dictionary[key]=i
                 i += 1
-
         out.close()
+        os.remove("postingTmp.txt")

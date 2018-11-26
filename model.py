@@ -3,7 +3,9 @@ class model(object):
 
     def __init__(self):
         self.data = 5
-        open("docs.txt", "w+")
+        with open("docs.txt", "w+") as out:
+            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
+        out.close()
 
     def dat(self):
         return self.data

@@ -44,7 +44,13 @@ class Index(object):
 
 
     def insertToPostingList(self, postingList, docDictionary,doc):
+        """
 
+        :param postingList:
+        :param docDictionary:
+        :param doc:
+        :return:
+        """
         for key in docDictionary.keys():
             value=docDictionary[key]
             if postingList.__contains__(key):
@@ -54,7 +60,12 @@ class Index(object):
                 postingList[key].append(PostingElement(doc.docNumber, value))
 
     def writePostingListToDisk(self, postingList, pid):
-
+        """
+        This function sorts the posting list and writes it into the disk.
+        :param postingList: given posting list
+        :param pid:
+        :return:
+        """
         with open(self.postingListPath +'/' +"posting" + str(pid) + ".txt", "w+") as out:
 
             for key in sorted(postingList.keys()):
@@ -76,8 +87,7 @@ class Index(object):
 
     def writeDocsToDick(self, docList,pid):
 
-        with open(self.postingListPath +'/' +"docs" + str(pid) + ".txt", "w+") as out:
-            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
+        with open("docs.txt", "a") as out:
             for doc in docList:
                 out.write(doc.toString()+"\n")
         out.close()
