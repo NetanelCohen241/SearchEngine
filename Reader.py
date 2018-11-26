@@ -49,7 +49,6 @@ class ReadFile(object):
                 docCity = re.findall(r'<F P=104>(.*?)</F>', i)
                 if len(docCity) > 0 and docCity[0] != "":
                     docCity = docCity[0].split()[0].upper()
-                    print(docCity)
                 else:
                     docCity = ""
             textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]

@@ -13,6 +13,7 @@ class PostingElement(object):
     def toString(self):
         return self.docNo+","+str(self.tf)
 
+
 class Index(object):
 
     def __init__(self,corpusPath,postingListPath):
@@ -20,9 +21,14 @@ class Index(object):
         self.postingListPath=postingListPath
 
     def createIndex(self,withStemming,pid):
-
+        """
+        This function creates an inverted index.
+        :param withStemming: determines whether do stemming or not
+        :param pid:
+        :return:
+        """
         postingList = {}
-        blockSize=50
+        blockSize=40
         read=Reader.ReadFile(self.corpusPath)
         parser=Parse.Parser()
         docList=read.startAction(pid*blockSize,blockSize)

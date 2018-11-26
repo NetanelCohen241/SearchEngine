@@ -13,6 +13,10 @@ class Merger(object):
         self.chunksListToMerge = []
         self.filesNames = os.listdir(self.filesToMergePath)
         self.pointers = []
+        open("mergedContent.txt", "w+")
+        open("dictionary.txt", "w+")
+
+
 
     def merge(self):
         """
@@ -24,6 +28,11 @@ class Merger(object):
         self.uploadAllFilesChunks()
         #insert into terms list the first term from each chunk
         for i in range(0, len(self.chunksListToMerge)):
+            try:
+                x=(self.chunksListToMerge[i][0][0])
+            except:
+                y=8
+                print(y)
             terms.append(self.chunksListToMerge[i][0][self.pointers[i]])
 
         self.startMerge(terms)
@@ -42,32 +51,39 @@ class Merger(object):
         :param terms:
         :return:
         """
+        postingListPointer=1
         while not self.hasFinished():
 
             minTermIdx = self.findMin(terms)
-            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx]]
-            self.dictionary[term] = minTermIdx
+            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx]%self.chunkSize]
             self.postingBlock[term] = ""
             #iterate over each chunk, in every chunk that the term exists, append its content to postingBlock
             for i in range(0, len(self.chunksListToMerge)):
                 #check if we already uploaded the all file
                 if self.pointers[i]==-1:
                     continue
-                if self.chunksListToMerge[i][0][self.pointers[i]] == term:
-                    self.postingBlock[term] += self.chunksListToMerge[i][1][self.pointers[i]]
+                pos= self.pointers[i]%self.chunkSize
+                if self.chunksListToMerge[i][0][pos] == term:
+                    self.postingBlock[term] += self.chunksListToMerge[i][1][pos]
                     self.pointers[i] += 1
                     if self.pointers[i] % self.chunkSize == 0:
                         self.uploadFileChunk(i)
-                    terms[i] = self.chunksListToMerge[i][0][self.pointers[i]]
+                    if self.pointers[i]!=-1:
+                        terms[i] = self.chunksListToMerge[i][0][self.pointers[i]%self.chunkSize]\
+
+            self.dictionary[term] = postingListPointer
+            postingListPointer+=1
+            if postingListPointer%100000==0:
+                self.writeMergeContentToDisk()
 
 
-    #this function can be multi-threaded
     def uploadAllFilesChunks(self):
 
         for i in range(len(self.filesNames)):
             self.chunksListToMerge.append(0)
             self.pointers.append(0)
             self.uploadFileChunk(i)
+
 
     def uploadFileChunk(self, fileNumber):
 
@@ -90,11 +106,8 @@ class Merger(object):
         for line in open(fileName):
             if current_line_number >= start:
                 tmp = line.split(':')
-                try:
-                    keys.append(tmp[0])
-                    values.append(tmp[1])
-                except:
-                    print(line)
+                keys.append(tmp[0])
+                values.append(tmp[1].replace('\n',''))
             current_line_number += 1
             if current_line_number==start+howManyToRead:
                 break
@@ -108,12 +121,13 @@ class Merger(object):
         :param terms: list of terms
         :return: the index of minimum value
         """
-        min = terms[0]
+        min = 0
         i = 0
         while i < len(terms):
-            if (terms[i] < min):
-                min = terms[i]
-        return i
+            if self.pointers[i]!=-1 and terms[i] < terms[min]:
+                min = i
+            i+=1
+        return min
 
     def hasFinished(self):
 
@@ -126,17 +140,18 @@ class Merger(object):
 
     def writeMergeContentToDisk(self):
 
-        with open(self.filesToMergePath +'/' +"mergedContent" + ".txt", "w+") as out:
+        with open("mergedContent.txt", "a+") as out:
 
             for key in self.postingBlock.keys():
                 out.write(key+ ":")
-                out.write(self.postingBlock[key])
+                out.write(self.postingBlock[key]+'\n')
         out.close()
+        self.postingBlock={}
+        with open("dictionary.txt", "a+") as out:
 
-        with open(self.filesToMergePath +'/' +"dictionary" + ".txt", "w+") as out:
-
-            for key in self.postingBlock.keys():
-                out.write(key+ ":")
-                out.write(self.postingBlock[key])
+            for key in self.dictionary.keys():
+                out.write(key+ " : ")
+                out.write(str(self.dictionary[key])+'\n')
         out.close()
+        self.dictionary={}
 
