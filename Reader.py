@@ -45,22 +45,29 @@ class ReadFile(object):
         :return:  list of document object
         """
         ans = []
-        docList = txt.split("</DOC>\n\n<DOC>")
+        docList = txt.split("</DOC>")
         docCity=[]
         for i in docList:
-            docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0]
-            if i.__contains__("<F"):
-                docCity = re.findall(r'<F P=104>(.*?)</F>', i)
-                if len(docCity) > 0 and docCity[0] != "":
-                    docCity = docCity[0].split()[0].upper()
-                else:
-                    docCity = ""
-            textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]
-            doc = Doc.Document(docNumber, textContent, docCity)
-            if doc.city != "" and docCity!=[]:
-                self.find_all_locations_in_text(doc)
+            if i=="\n" or i=="\n\n" or i=="\n\n\n" or i=="\n\n\n\n":
+                break
+            try:
+                docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0]
+                if i.__contains__("<F"):
+                    docCity = re.findall(r'<F P=104>(.*?)</F>', i)
+                    if len(docCity) > 0 and docCity[0] != "":
+                        docCity = docCity[0].split()[0].upper()
+                    else:
+                        docCity = ""
+                textContent=""
+                if i.__contains__("<TEXT>"):
+                    textContent = (i.split("<TEXT>")[1]).split("</TEXT")[0]
+                doc = Doc.Document(docNumber, textContent, docCity)
+                if doc.city != "" and docCity!=[]:
+                    self.find_all_locations_in_text(doc)
 
-            ans.append(doc)
+                ans.append(doc)
+            except:
+                print("error")
         return ans
 
     def find_all_locations_in_text(self, doc):
