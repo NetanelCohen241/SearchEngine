@@ -1,11 +1,51 @@
+import json
+
+import multiprocessing
+from multiprocessing import Pool
+
+import os
+import requests
+import time
+
+import Indexer
+
+class indexElement(object):
+
+    def __init__(self,id,courpus_path,posting_path,stem):
+        self.id=id
+        self.courpus_path=courpus_path
+        self.posting_path=posting_path
+        self.stem=stem
+
 
 class model(object):
 
     def __init__(self):
+        ##adding city file
+        ##city dict{} from api
+        self.term_dictionary = {}
+        self.cities_from_api={}
+        self.fill_cites()
         self.data = 5
         with open("docs.txt", "w+") as out:
             out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
+        with open("cites.txt", "w+") as fout:
+            fout.write("City            stateName             currency          population          docId:locations\n")
+        fout.close()
+
+    def set_corpus_path(self,path):
+        self.corpus_path=path
+
+    def set_posting_and_dictionary_path(self,path):
+        self.posting_and_dictionary_path=path
+
+
+    def reset_memory(self,path):
+        files_to_delete=os.listdir(path)
+        for file in files_to_delete:
+            os.remove(path+"/"+str(file))
+        self.term_dictionary.clear()
 
     def dat(self):
         return self.data
@@ -15,5 +55,44 @@ class model(object):
         self.data=int(value)
         print("new value:{0} ".format(self.data))
 
-    def toSreing(self):
-        return str(self.data)
+    def read_dictionary_from_file(self,path):
+        with open(path+"/dictionary.txt","r") as f:
+            txt=f.read()
+        print(txt)
+
+    def fill_cites(self):
+        response = requests.get("https://restcountries.eu/rest/v2/all")
+        json_content = json.loads(response.text)
+        i = 0
+        for t in json_content:
+            currency=t["currencies"][0]["code"]
+            pop=t["population"]
+            state_name=t["name"]
+            self.cities_from_api[t["capital"].lower()]=[str(state_name),str(currency),str(pop)]
+
+    def index(self,index_ele):
+        idx = Indexer.Index(index_ele.courpus_path,index_ele.posting_path,self.cities_from_api)
+        idx.createIndex(index_ele.stem,index_ele.id)
+
+    def start_index(self,corpus_path,posting_path,stem):
+        processes = []
+        tasks = []
+        for i in range(0, 45):
+            index_element=indexElement(i,corpus_path,posting_path,stem)
+            tasks.append(index_element)
+        starttime = time.time()
+        pool = Pool(processes=(multiprocessing.cpu_count()) - 1)
+        pool.map(self.index, tasks)
+        print(time.time() - starttime)
+
+# if __name__ == '__main__':
+#     Model=model()
+    # processes = []
+    # numbers = []
+    # for i in range(0, 45):
+    #     numbers.append(i)
+    # starttime = time.time()
+    # pool = Pool(processes=(multiprocessing.cpu_count())-1)
+    # pool.map(Model.index, numbers)
+    # print(time.time()-starttime)
+

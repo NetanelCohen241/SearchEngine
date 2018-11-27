@@ -16,8 +16,10 @@ class Parser(object):
         self.trm = []
 
     def parse(self, text, withStemming):
-
         docDictionary = {}
+        if text=="":
+            return docDictionary
+
         docDictionary = self.parseRules(text, docDictionary)
 
         if withStemming is True:
@@ -349,9 +351,11 @@ class Parser(object):
                         term = tokens[i].replace(',', '').replace('.', '')
             except:
                 term = tokens[i]
-
-            self.addToDictionary(docDictionary, [term])
-            i = i + 1
+            try:
+                self.addToDictionary(docDictionary, [term])
+                i = i + 1
+            except:
+                print
 
         return docDictionary
 

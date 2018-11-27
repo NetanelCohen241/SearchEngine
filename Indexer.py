@@ -14,11 +14,25 @@ class PostingElement(object):
         return self.docNo+","+str(self.tf)
 
 
+class City(object):
+    def __init__(self):
+        self.currency=""
+        self.population=""
+        self.name=""
+        self.doc_list_and_locations={}
+
+    def toString(self):
+        return "{0}            {1}            {2}             {3}" \
+            .format(self.name, self.currency, self.population, self.doc_list_and_locations)
+
+
 class Index(object):
 
-    def __init__(self,corpusPath,postingListPath):
+    def __init__(self,corpusPath,postingListPath,city_dict):
         self.corpusPath=corpusPath
         self.postingListPath=postingListPath
+        self.city_dict_from_api=city_dict
+        self.parser = Parse.Parser()
         # self.docs=[]
 
     def createIndex(self,withStemming,pid):
@@ -29,16 +43,19 @@ class Index(object):
         :return: a dictionary: key=term, value= how many the term appeared in the doc(tf)
         """
         postingList = {}
+        ##create city dict{} key=city value=obj with relevent data api data + list docs
+        city = {}
         blockSize=40
         read=Reader.ReadFile(self.corpusPath)
-        parser=Parse.Parser()
         docList=read.startAction(pid*blockSize,blockSize)
 
         for doc in docList:
-            docDictionary=parser.parse(doc.txt,withStemming)
+            docDictionary=self.parser.parse(doc.txt,withStemming)
             doc.setNumOfUniqeTerms(len(docDictionary.keys()))
             doc.setMaxtf(self.calcMaxTf(docDictionary))
             self.insertToPostingList(postingList,docDictionary,doc)
+            self.insert_to_city(city,doc)
+        self.writeCityToDick(city,pid)
         self.writeDocsToDick(docList,pid)
         self.writePostingListToDisk(postingList,pid)
 
@@ -58,6 +75,30 @@ class Index(object):
             else:
                 postingList[key] = []
                 postingList[key].append(PostingElement(doc.docNumber, value))
+
+    def insert_to_city(self, my_city, doc):
+        if doc.city=="" or doc.city==[]:
+            return
+        city_obj = City()
+        doc_city=doc.city.lower()
+        if doc_city in my_city:
+            # city[doc.city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
+            if doc.docNumber in my_city[doc_city].doc_list_and_locations and len(doc.cityLocations)>0:
+                my_city[doc_city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
+            elif len(doc.cityLocations)>0:
+                my_city[doc_city].doc_list_and_locations[doc.docNumber]=doc.cityLocations
+            return
+        if len(doc.cityLocations)>0 and doc_city in self.city_dict_from_api:
+            data = self.city_dict_from_api[doc_city]
+            name=data[0]
+            currency=data[1]
+            population=data[2]
+            city_obj.name=name
+            city_obj.currency=currency
+            trash,city_obj.population=self.parser.calcSize([population],0)
+            city_obj.doc_list_and_locations[doc.docNumber]=doc.cityLocations
+            my_city[doc_city]=city_obj
+
 
     def writePostingListToDisk(self, postingList, pid):
         """
@@ -91,7 +132,14 @@ class Index(object):
             for doc in docList:
                 out.write(doc.toString()+"\n")
         out.close()
+    ##write city to disc
+    def writeCityToDick(self, city, pid):
+        with open(self.postingListPath +'/' +"city" + str(pid) + ".txt", "w+") as out:
 
+            for key in sorted(city.keys()):
+                out.write(key+ ":           "+city[key].toString()+ " " )
+                out.write("\n")
+        out.close()
 
 
 
