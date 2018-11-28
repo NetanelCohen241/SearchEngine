@@ -68,7 +68,7 @@ class ReadFile(object):
                     date=re.findall(r'<DATE1>(.*?)</DATE1>', i)[0]
                     doc.setDate(date)
                 if i.__contains__("<TI>"):
-                    title=re.findall(r'<TI>(.*?)</TI>', i)[0]
+                    title=re.findall(r'<TI>(.*?)</TI>', i)[0].split()
                     doc.setTitle(title)
 
                 ans.append(doc)
