@@ -64,6 +64,12 @@ class ReadFile(object):
                 doc = Doc.Document(docNumber, textContent, docCity)
                 if doc.city != "" and docCity!=[]:
                     self.find_all_locations_in_text(doc)
+                if i.__contains__("<DATE1>"):
+                    date=re.findall(r'<DATE1>(.*?)</DATE1>', i)[0]
+                    doc.setDate(date)
+                if i.__contains__("<TI>"):
+                    title=re.findall(r'<TI>(.*?)</TI>', i)[0]
+                    doc.setTitle(title)
 
                 ans.append(doc)
             except:
