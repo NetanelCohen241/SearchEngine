@@ -15,12 +15,12 @@ class controller(object):
 
         self.model.reset_memory(path)
 
-    def get_dict_data(self,path):
+    def get_dict_data(self):
         """
         :param path: path of the location of the ductionary
         :return:
         """
-        pass
+        return self.model.get_dictionary()
 
     def start_indexing(self,corpusPath,postingPath,stem_flag):
         """
@@ -55,4 +55,5 @@ class controller(object):
         :param path: the path of the directory that contain dictionary.txt
         :return:
         """
-        self.model.read_dictionary_from_file(path)
+        return self.model.read_dictionary_from_file(path)
+

@@ -24,6 +24,7 @@ class model(object):
         ##adding city file
         ##city dict{} from api
         self.term_dictionary = {}
+        self.fake=""
         self.cities_from_api={}
         self.fill_cites()
         self.data = 5
@@ -57,8 +58,12 @@ class model(object):
 
     def read_dictionary_from_file(self,path):
         with open(path+"/dictionary.txt","r") as f:
-            txt=f.read()
-        print(txt)
+            txt=f.readlines()
+            for line in txt:
+                line=line.replace("\n","")
+                tmp=line.split(":")
+                data=tmp[1].split(",")
+                self.term_dictionary[tmp[0]]=data
 
     def fill_cites(self):
         response = requests.get("https://restcountries.eu/rest/v2/all")
@@ -69,6 +74,9 @@ class model(object):
             pop=t["population"]
             state_name=t["name"]
             self.cities_from_api[t["capital"].lower()]=[str(state_name),str(currency),str(pop)]
+
+    def get_dictionary(self):
+        return self.term_dictionary
 
     def index(self,index_ele):
         idx = Indexer.Index(index_ele.courpus_path,index_ele.posting_path,self.cities_from_api)
@@ -85,14 +93,4 @@ class model(object):
         pool.map(self.index, tasks)
         print(time.time() - starttime)
 
-# if __name__ == '__main__':
-#     Model=model()
-    # processes = []
-    # numbers = []
-    # for i in range(0, 45):
-    #     numbers.append(i)
-    # starttime = time.time()
-    # pool = Pool(processes=(multiprocessing.cpu_count())-1)
-    # pool.map(Model.index, numbers)
-    # print(time.time()-starttime)
 
