@@ -78,9 +78,9 @@ class model(object):
     def get_dictionary(self):
         return self.term_dictionary
 
-    def index(self,index_ele):
-        idx = Indexer.Index(index_ele.courpus_path,index_ele.posting_path,self.cities_from_api)
-        idx.createIndex(index_ele.stem,index_ele.id)
+    def index(self, index_element):
+        idx = Indexer.Index(index_element.courpus_path, index_element.posting_path, self.cities_from_api)
+        idx.createIndex(index_element.stem, index_element.id)
 
     def start_index(self,corpus_path,posting_path,stem):
         processes = []

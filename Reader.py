@@ -51,7 +51,7 @@ class ReadFile(object):
             if i=="\n" or i=="\n\n" or i=="\n\n\n" or i=="\n\n\n\n":
                 break
             try:
-                docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0]
+                docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0].replace(" ","")
                 if i.__contains__("<F"):
                     docCity = re.findall(r'<F P=104>(.*?)</F>', i)
                     if len(docCity) > 0 and docCity[0] != "":
@@ -64,12 +64,12 @@ class ReadFile(object):
                 doc = Doc.Document(docNumber, textContent, docCity)
                 if doc.city != "" and docCity!=[]:
                     self.find_all_locations_in_text(doc)
-                if i.__contains__("<DATE1>"):
-                    date=re.findall(r'<DATE1>(.*?)</DATE1>', i)[0]
-                    doc.setDate(date)
-                if i.__contains__("<TI>"):
-                    title=re.findall(r'<TI>(.*?)</TI>', i)[0].split()
-                    doc.setTitle(title)
+                # if i.__contains__("<DATE1>"):
+                #     date=re.findall(r'<DATE1>(.*?)</DATE1>', i)[0]
+                #     doc.setDate(date)
+                # if i.__contains__("<TI>"):
+                #     title=re.findall(r'<TI>(.*?)</TI>', i)[0].split()
+                #     doc.setTitle(title)
 
                 ans.append(doc)
             except:

@@ -16,10 +16,10 @@ class Parser(object):
         self.trm = []
 
     def parse(self, text, withStemming):
+
         docDictionary = {}
         if text=="":
             return docDictionary
-
         docDictionary = self.parseRules(text, docDictionary)
 
         if withStemming is True:
@@ -205,7 +205,7 @@ class Parser(object):
                   .replace('`', '').replace('+','').replace('>', ' ').replace('<', ' ').replace(';', '').replace('--', '').split(' '))
 
         with open("stop_words.txt", "r") as sw:
-            stopWords = sw.read();
+            stopWords = sw.read()
         sw.close()
         while i < len(tokens):
 
@@ -237,6 +237,8 @@ class Parser(object):
                     if self.isNumber(tokens[i]):
                         i, term = self.calcSize(tokens, i)
                         term += "%"
+                    else:
+                        term=tokens[i]
                 elif self.isFraction(tokens[i]):
                     term = tokens[i]
                 # Number
@@ -244,8 +246,7 @@ class Parser(object):
 
                     # Percent
                     if i + 1 < len(tokens) and (tokens[i + 1].lower().replace(',', '').replace('.', '') == "percent" or
-                                                tokens[i + 1].lower().replace(',', '').replace('.',
-                                                                                               '') == "percentage"):
+                                                tokens[i + 1].lower().replace(',', '').replace('.','') == "percentage"):
                         i, term = self.calcSize(tokens, i)
                         term += '%'
                         i = i + 1
@@ -275,10 +276,14 @@ class Parser(object):
                                         self.addToDictionary(docDictionary, [t2])
                                         term = term + "-" + t2
                                         i = i + acc + 1
+                                    else:
+                                        term=tokens[i+1]
                                 # Number-Word
                                 else:
                                     i = i + 1
                                     term = term + "-" + rangeTokens[1]
+                            else:
+                                term=tokens[i]
                         elif tokens[i].isdigit():
                             # Date
                             if i + 1 < len(tokens):
@@ -287,7 +292,7 @@ class Parser(object):
                                     term = self.dateFormat(mon, tokens[i])
                                     i = i + 1
                                 elif tokens[i + 1].replace(",", '') == "GMT":
-                                    term = tokens[i + 1][:2] + ":" + tokens[i + 1][2:]
+                                    term = tokens[i + 1][:2] + "_" + tokens[i + 1][2:]
                                     i = i + 1
                                 else:
                                     i, term = self.calcSize(tokens, i)
@@ -335,7 +340,7 @@ class Parser(object):
                             if self.isNumber(rangeTokens[1]):
                                 # - Number
                                 if rangeTokens[1].startswith('0'):
-                                    t2 = rangeTokens[1][:2] + ":" + rangeTokens[1][2:]
+                                    t2 = rangeTokens[1][:2] + "_" + rangeTokens[1][2:]
                                     if i + 1 < len(tokens) and tokens[i + 1].replace(",", '') == "GMT":
                                         i = i + 1
                                 elif i + 1 < len(tokens) and tokens[i + 1].lower() in size:
@@ -348,14 +353,14 @@ class Parser(object):
                             if term == "":
                                 term = t1 + "-" + t2
                     else:
-                        term = tokens[i].replace(',', '').replace('.', '')
+                        term = tokens[i].replace(',', '').replace('.', '').replace('/','').replace('-','').replace('=','').replace('_','')
             except:
                 term = tokens[i]
             try:
                 self.addToDictionary(docDictionary, [term])
-                i = i + 1
             except:
-                print
+                print(tokens[i])
+            i = i + 1
 
         return docDictionary
 

@@ -28,6 +28,7 @@ import FileMerge
 #
 # t=Test(5)
 # t.x()
+import model
 
 x=Parse.Parser()
 # print(x.parse("</F>",False))
@@ -47,10 +48,20 @@ x=Parse.Parser()
 # t=time.time()
 # print(time.time()-t)
 
-# print ("hello")
-def index(pid):
-    idx = Indexer.Index("D:\iretrival\corpus", "D:\iretrival\posting")
-    idx.createIndex(False,pid)
+
+
+
+
+# mod = model.model()
+# # print ("hello")
+# def index(pid):
+#
+#     idx = Indexer.Index("D:\iretrival\corpus", "D:\iretrival\posting",mod.cities_from_api)
+#     idx.createIndex(False,pid)
+
+
+
+
 # print("Number of cpu : ", multiprocessing.cpu_count())
 #
 # t=time.time()
@@ -67,8 +78,7 @@ line = linecache.getline("testread.txt", 208)
 #     # print(dirpath)
 #     print(filenames)
 
-z=sorted(["A","a","B"])
-print(z)
+print("1000m".islower())
 
 
 # count=0
@@ -106,11 +116,43 @@ if __name__ == '__main__':
     # print(time.time() - starttime)
 
     #
-    starttime = time.time()
-    merger=FileMerge.Merger("D:\iretrival\posting",2000)
-    merger.merge()
-    print(time.time() - starttime)
+    # starttime = time.time()
+    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
+    # merger.merge()
+    # print(time.time() - starttime)
+    #
+    # i=0
+    # with open("pos.txt", "w+") as out:
+    #     for i in range(168000):
+    #         line = linecache.getline("postingTmp.txt",i)
+    #         out.write(line)
+    #         i += 1
+    # out.close()
 
+    # counter = 0
+    # starttime = time.time()
+    # with open("pos.txt", "w+") as out1:
+    #     with open("postingTmp.txt", "r") as out2:
+    #
+    #         lines=out2.readlines()
+    #         for i in range(168000):
+    #             line = lines[i]
+    #             out1.seek(counter)
+    #             out1.write(line)
+    #             counter += len(line)
+    # # print(time.time() - starttime)
+    # mod=model.model()
+    # mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
+
+    with open("dictionary.txt","r") as d:
+        with open("posting.txt","r") as p:
+            line=""
+            for i in range(0,150000):
+                line=d.readline()
+            pointer=int(line.split(':')[1].replace('\n',''))
+            p.seek(pointer)
+            ans=p.readline()
+            print(ans)
 
 
 

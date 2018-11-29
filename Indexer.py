@@ -3,15 +3,16 @@ import Parse
 
 class PostingElement(object):
 
-    def __init__(self, docNo, tf):
+    def __init__(self, docNo, tf, inTitle):
         self.docNo=docNo
         self.tf=tf
+        self.inTitle=inTitle
 
     def updateTf(self,tf):
         self.tf=tf
 
     def toString(self):
-        return self.docNo+","+str(self.tf)
+        return self.docNo.replace(" ",'')+","+str(self.tf)+","+str(self.inTitle)
 
 
 class City(object):
@@ -51,12 +52,13 @@ class Index(object):
 
         for doc in docList:
             docDictionary=self.parser.parse(doc.txt,withStemming)
+            # doc.title=self.parser.parse(doc.title.join(" "),withStemming).keys()
             doc.setNumOfUniqeTerms(len(docDictionary.keys()))
             doc.setMaxtf(self.calcMaxTf(docDictionary))
             self.insertToPostingList(postingList,docDictionary,doc)
             self.insert_to_city(city,doc)
-        self.writeCityToDick(city,pid)
-        self.writeDocsToDick(docList,pid)
+        self.writeCityToDisk(city,pid)
+        self.writeDocsToDisk(docList,pid)
         self.writePostingListToDisk(postingList,pid)
 
 
@@ -69,19 +71,24 @@ class Index(object):
         :return:
         """
         for key in docDictionary.keys():
+            inTitle="F"
             value=docDictionary[key]
+            # if key in doc.title:
+            #     inTitle="T"
+            if ':' in key:
+                key.replace
             if postingList.__contains__(key):
-                postingList[key].append(PostingElement(doc.docNumber, value))
+                postingList[key].append(PostingElement(doc.docNumber, value, inTitle))
             else:
                 postingList[key] = []
-                postingList[key].append(PostingElement(doc.docNumber, value))
+                postingList[key].append(PostingElement(doc.docNumber, value, inTitle))
 
     def insert_to_city(self, my_city, doc):
         if doc.city=="" or doc.city==[]:
             return
         city_obj = City()
         doc_city=doc.city.lower()
-        if doc_city in my_city:
+        if doc_city in my_city.keys():
             # city[doc.city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
             if doc.docNumber in my_city[doc_city].doc_list_and_locations and len(doc.cityLocations)>0:
                 my_city[doc_city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
@@ -112,7 +119,7 @@ class Index(object):
             for key in sorted(postingList.keys()):
                 out.write(key+ ":")
                 for element in postingList[key]:
-                    out.write(element.toString()+ " " )
+                    out.write(element.toString()+ " ")
                 out.write("\n")
         out.close()
 
@@ -126,14 +133,15 @@ class Index(object):
 
         return max
 
-    def writeDocsToDick(self, docList,pid):
+    def writeDocsToDisk(self, docList,pid):
 
         with open("docs.txt", "a") as out:
             for doc in docList:
                 out.write(doc.toString()+"\n")
         out.close()
+
     ##write city to disc
-    def writeCityToDick(self, city, pid):
+    def writeCityToDisk(self, city, pid):
         with open(self.postingListPath +'/' +"city" + str(pid) + ".txt", "w+") as out:
 
             for key in sorted(city.keys()):
