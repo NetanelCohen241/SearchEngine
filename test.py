@@ -68,8 +68,7 @@ x=Parse.Parser()
 # for i in range(0,100):
 #     index(i)
 # print(time.time()-t)
-linecache.clearcache()
-line = linecache.getline("testread.txt", 208)
+
 
 #
 #
@@ -78,7 +77,6 @@ line = linecache.getline("testread.txt", 208)
 #     # print(dirpath)
 #     print(filenames)
 
-print("1000m".islower())
 
 
 # count=0
@@ -116,10 +114,17 @@ if __name__ == '__main__':
     # print(time.time() - starttime)
 
     #
+
+    #
+    #
     # starttime = time.time()
-    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
+    # merger=FileMerge.Merger("D:\iretrival\merge",2000)
     # merger.merge()
     # print(time.time() - starttime)
+
+
+
+
     #
     # i=0
     # with open("pos.txt", "w+") as out:
@@ -143,16 +148,53 @@ if __name__ == '__main__':
     # # print(time.time() - starttime)
     # mod=model.model()
     # mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
-
-    with open("dictionary.txt","r") as d:
+    starttime = time.time()
+    merger=FileMerge.Merger("D:\iretrival\posting",1000)
+    merger.merge("posting")
+    print(time.time() - starttime)
+    # with open("dictionary.txt","r") as d:
+    #     with open("posting.txt","r") as p:
+    #         line=""
+    #         for i in range(148005):
+    #             line=d.readline()
+    #         print(line)
+    #         pointer=int(line.split(':')[1].split(',')[1].replace('\n',''))
+    #
+    #         p.seek(pointer)
+    #         ans=p.readline()
+    #         print(ans)
+    dict={}
+    with open("dictionary.txt", "r") as d:
         with open("posting.txt","r") as p:
-            line=""
-            for i in range(0,150000):
-                line=d.readline()
-            pointer=int(line.split(':')[1].replace('\n',''))
-            p.seek(pointer)
-            ans=p.readline()
-            print(ans)
+
+            d_lines = d.readlines()
+            for line in d_lines:
+                tmp = line.split(':')
+                dict[tmp[0].lower()] = 0
+            for i in range(150000):
+                pic_line = p.readline()
+                if pic_line.split(':')[0].lower() not in dict.keys():
+                    print(str(i))
+                    print("p----" + pic_line)
+                    # print("p----"+post_line)
+
+                    break
+
+
+
+
+            p_lines=p.readlines()
+            for line in p_lines:
+                tmp=line.split(':')
+                dict[tmp[0].lower()]=0
+            for i in range(150000):
+                dic_line = d.readline()
+                if dic_line.split(':')[0].lower() not in dict.keys():
+                    print(str(i))
+                    print("d----"+dic_line)
+                    # print("p----"+post_line)
+
+                    break
 
 
 

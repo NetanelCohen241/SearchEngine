@@ -6,7 +6,7 @@ class Document:
         self.cityLocations=[]
         self.numOfUniqeTerms=0
         self.maxTf=0
-        self.data_of_publish=""
+        self.date_of_publish= ""
         self.title=""
 
     def setMaxtf(self,max_tf):
@@ -19,9 +19,9 @@ class Document:
         self.title=title
 
     def setDate(self,date):
-        self.data_of_publish=date
+        self.date_of_publish=date
 
     def toString(self):
         return "{0}            {1}            {2}             {3}            {4}         {5}         {6}"\
-                .format(self.docNumber,self.city,self.cityLocations,self.numOfUniqeTerms ,self.maxTf,self.data_of_publish,self.title)
+                .format(self.docNumber, self.city, self.cityLocations, self.numOfUniqeTerms, self.maxTf, self.date_of_publish, self.title)
 

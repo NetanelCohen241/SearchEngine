@@ -52,7 +52,7 @@ class Index(object):
 
         for doc in docList:
             docDictionary=self.parser.parse(doc.txt,withStemming)
-            # doc.title=self.parser.parse(doc.title.join(" "),withStemming).keys()
+            doc.title=self.parser.parse(doc.title.join(" "),withStemming).keys()
             doc.setNumOfUniqeTerms(len(docDictionary.keys()))
             doc.setMaxtf(self.calcMaxTf(docDictionary))
             self.insertToPostingList(postingList,docDictionary,doc)
@@ -73,10 +73,8 @@ class Index(object):
         for key in docDictionary.keys():
             inTitle="F"
             value=docDictionary[key]
-            # if key in doc.title:
-            #     inTitle="T"
-            if ':' in key:
-                key.replace
+            if key in doc.title:
+                inTitle="T"
             if postingList.__contains__(key):
                 postingList[key].append(PostingElement(doc.docNumber, value, inTitle))
             else:

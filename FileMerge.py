@@ -21,17 +21,17 @@ class Merger(object):
         self.dictionary = {}
         self.postingBlock = {}
         self.chunksListToMerge = []
-        self.filesNames = [word for word in os.listdir(self.filesToMergePath) if word.startswith("posting")]
         self.pointers = []
+        self.filesNames=[]
         open("postingTmp.txt", "w+")
         open("dictionary.txt", "w+")
 
-    def merge(self):
+    def merge(self, file_name):
         """
         This function merge the files into one sorted file - posting list
         :return:
         """
-
+        self.filesNames = [word for word in os.listdir(self.filesToMergePath) if word.startswith(file_name)]
         terms = []
         self.uploadAllFilesChunks()
         # insert into terms list the first term from each chunk
@@ -191,8 +191,9 @@ class Merger(object):
         if term=="" or str(term)[0].isupper():
             if self.dictionary.__contains__(term.lower()):
                 self.dictionary[term.upper()].pointer *= -1
-            # elif self.postingBlock.keys().__contains__(str(term).upper()):
-            #     self.postingBlock[term.upper()]+=self.postingBlock[term]
+
+            elif self.postingBlock.keys().__contains__(str(term).upper()):
+                self.postingBlock[term.upper()]+=self.postingBlock[term]
             else:
                 term = term.upper()
                 e.pointer=postingListPointer
@@ -207,60 +208,74 @@ class Merger(object):
         """
         This function responsible to merge term that appear multiple times in dictionary in different forms,
         for example: one time in uppercase and another time with lowercase.
-        After the merge, it update the new pointers for each term in dictionary
+        After the merge, it updates the new pointers for each term in dictionary
         :return:
         """
-        with open("postingTmp.txt", "r") as oldPosting:
-            postingBlock = {}
-            i=0
-            keys_to_delete=[]
-            for key in self.dictionary.keys():
+        postingBlock = {}
+        keys_to_delete=[]
+        for key in self.dictionary.keys():
 
-                if self.dictionary[key].pointer < 0:
-                    pointer = self.dictionary[key].pointer * (-1)
-                    # oldPosting.seek(pointer)
-                    linec=linecache.getline("postingTmp.txt",pointer)
-                    # print(linec.split(':')[0])
-                    if key.lower() != linec.split(':')[0].lower():
-                        print(key)
+            if self.dictionary[key].pointer < 0:
+                pointer = self.dictionary[key].pointer * (-1)
+                # oldPosting.seek(pointer)
+                linec=linecache.getline("postingTmp.txt",pointer)
+                # print(linec.split(':')[0])
+                # if key.lower() != linec.split(':')[0].lower():
+                #     print(key)
 
-                    # print(oldPosting.readline())
-                    upperLine = linec.split(':')[1]
+                # print(oldPosting.readline())
+                upperLine = linec.split(':')[1]
 
-                    #get the posting list of the term in lowercase
-                    # oldPosting.seek(self.dictionary[key.lower()].pointer)
-                    lowerLine = linecache.getline("postingTmp.txt",self.dictionary[key.lower()].pointer).replace('\n','')
-                    lowerLine += " "+upperLine
-                    # print(lowerLine)
-                    tmp=lowerLine.split(':')
-                    postingBlock[tmp[0]]=tmp[1]
-                    keys_to_delete.append(key)
+                #get the posting list of the term in lowercase
+                # oldPosting.seek(self.dictionary[key.lower()].pointer)
+                lowerLine = linecache.getline("postingTmp.txt",self.dictionary[key.lower()].pointer).replace('\n','')
+                lowerLine += " "+upperLine
+                # print(lowerLine)
+                tmp=lowerLine.split(':')
+                postingBlock[tmp[0]]=tmp[1]
+                keys_to_delete.append(key)
 
-                i+=1
+        for key in keys_to_delete:
+            del self.dictionary[key]
+        with open("key.txt","w+") as k:
             for key in keys_to_delete:
-                del self.dictionary[key]
-            print(len(keys_to_delete))
-            print(len(self.dictionary.keys()))
-            with open("posting.txt", "w+") as newPosting:
-                i = 0
-                line_num=1
-                pos_keys=postingBlock.keys()
-                for key in self.dictionary.keys():
-                    line = linecache.getline("postingTmp.txt",line_num)
-                    tmp=line.split(':')
-                    if tmp[0] not in self.dictionary.keys():
-                        line_num+=1
-                        continue
-                    if tmp[0] in pos_keys:
-                        line= key +":"+postingBlock[tmp[0]]
-
-                    newPosting.write(line)
-                    self.dictionary[key].pointer=i
-                    self.dictionary[key].corpus_tf=self.calculateTotalTf(line)
-                    i += len(line)
+                k.write(key+'\n')
+        with open("posting.txt", "w+") as newPosting:
+            i = 0
+            line_num=1
+            continu=0
+            pos_keys=postingBlock.keys()
+            print("dict----------"+str(len(self.dictionary.keys())))
+            print("delete--------"+str(len(pos_keys)))
+            j=0
+            while j <len(self.dictionary.keys()):
+                line = linecache.getline("postingTmp.txt",line_num)
+                if line=="":
+                    break
+                tmp=line.split(':')[0]
+                if tmp=="" or tmp[0].isupper():
+                    key=tmp.upper()
+                elif tmp[0].islower():
+                    key = tmp.lower()
+                else:
+                    key=tmp
+                if key not in self.dictionary.keys():
                     line_num+=1
-            newPosting.close()
-        oldPosting.close()
+                    continu+=1
+                    continue
+
+                if key in pos_keys:
+                    line= key +":"+postingBlock[key]
+
+                newPosting.write(line)
+                # print(j)
+                self.dictionary[key].pointer=i
+                self.dictionary[key].corpus_tf=self.calculateTotalTf(line)
+                i += len(line)+1
+                line_num+=1
+                j+=1
+        print(continu)
+        newPosting.close()
         # os.remove("postingTmp.txt")
 
     def calculateTotalTf(self, line):

@@ -76,6 +76,11 @@ class ReadFile(object):
         return ans
 
     def find_all_locations_in_text(self, doc):
+        """
+        This function finds the city locations in the text.
+        :param doc: The document where the function has to find city locations
+        :return:
+        """
         text=doc.txt.lower()
         start = 0
         while True:
