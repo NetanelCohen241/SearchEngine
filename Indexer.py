@@ -95,16 +95,18 @@ class Index(object):
             elif len(doc.cityLocations)>0:
                 my_city[doc_city].doc_list_and_locations[doc.docNumber]=doc.cityLocations
             return
-        if len(doc.cityLocations)>0 and doc_city in self.city_dict_from_api:
-            data = self.city_dict_from_api[doc_city]
-            name=data[0]
-            currency=data[1]
-            population=data[2]
-            city_obj.name=name
-            city_obj.currency=currency
-            trash,city_obj.population=self.parser.calcSize([population],0)
-            city_obj.doc_list_and_locations[doc.docNumber]=doc.cityLocations
-            my_city[doc_city]=city_obj
+        if len(doc.cityLocations)>0:
+            if doc_city in self.city_dict_from_api:
+                data = self.city_dict_from_api[doc_city]
+                city_obj.name = data[0]
+                city_obj.currency = data[1]
+                trash,city_obj.population = self.parser.calcSize([data[2]], 0)
+            else:
+                city_obj.name = "N"
+                city_obj.currency = "N"
+                city_obj.population = "0"
+                city_obj.doc_list_and_locations[doc.docNumber] = doc.cityLocations
+            my_city[doc_city] = city_obj
 
 
     def writePostingListToDisk(self, postingList, pid):
