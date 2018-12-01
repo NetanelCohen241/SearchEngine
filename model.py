@@ -1,10 +1,10 @@
 import json
+import requests
 
 import multiprocessing
 from multiprocessing import Pool
 
 import os
-import requests
 import time
 
 import Indexer

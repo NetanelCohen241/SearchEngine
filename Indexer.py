@@ -12,7 +12,7 @@ class PostingElement(object):
         self.tf=tf
 
     def toString(self):
-        return self.docNo.replace(" ",'')+","+str(self.tf)+","+str(self.inTitle)
+        return self.docNo.replace(" ",'')+","+str(self.tf.toString())+","+str(self.inTitle)
 
 
 class City(object):
@@ -20,11 +20,10 @@ class City(object):
         self.currency=""
         self.population=""
         self.name=""
-        self.doc_list_and_locations={}
 
     def toString(self):
-        return "{0}            {1}            {2}             {3}" \
-            .format(self.name, self.currency, self.population, self.doc_list_and_locations)
+        return "{0}            {1}            {2}" \
+            .format(self.name, self.currency, self.population)
 
 
 class Index(object):
@@ -52,7 +51,7 @@ class Index(object):
 
         for doc in docList:
             docDictionary=self.parser.parse(doc.txt,withStemming)
-            doc.title=self.parser.parse(doc.title.join(" "),withStemming).keys()
+            doc.title=self.parser.parse(" ".join(doc.title),withStemming).keys()
             doc.setNumOfUniqeTerms(len(docDictionary.keys()))
             doc.setMaxtf(self.calcMaxTf(docDictionary))
             self.insertToPostingList(postingList,docDictionary,doc)
@@ -84,26 +83,19 @@ class Index(object):
     def insert_to_city(self, my_city, doc):
         if doc.city=="" or doc.city==[]:
             return
-        city_obj = City()
         doc_city=doc.city.lower()
         if doc_city in my_city.keys():
-            # city[doc.city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
-            if doc.docNumber in my_city[doc_city].doc_list_and_locations and len(doc.cityLocations)>0:
-                my_city[doc_city].doc_list_and_locations[doc.docNumber].append(doc.cityLocations)
-            elif len(doc.cityLocations)>0:
-                my_city[doc_city].doc_list_and_locations[doc.docNumber]=doc.cityLocations
             return
-        if len(doc.cityLocations)>0:
-            if doc_city in self.city_dict_from_api:
-                data = self.city_dict_from_api[doc_city]
-                city_obj.name = data[0]
-                city_obj.currency = data[1]
-                trash,city_obj.population = self.parser.calcSize([data[2]], 0)
-            else:
-                city_obj.name = "N"
-                city_obj.currency = "N"
-                city_obj.population = "0"
-                city_obj.doc_list_and_locations[doc.docNumber] = doc.cityLocations
+        city_obj = City()
+        if doc_city in self.city_dict_from_api:
+             data = self.city_dict_from_api[doc_city]
+             city_obj.name = data[0]
+             city_obj.currency = data[1]
+             trash,city_obj.population = self.parser.calcSize([data[2]], 0)
+        else:
+            city_obj.name = "N"
+            city_obj.currency = "N"
+            city_obj.population = "0"
             my_city[doc_city] = city_obj
 
 
@@ -128,8 +120,8 @@ class Index(object):
         keys=docDictionary.keys()
         max=0
         for key in keys:
-            if docDictionary[key]> max:
-                max=docDictionary[key]
+            if docDictionary[key].frq> max:
+                max=docDictionary[key].frq
 
         return max
 
@@ -142,6 +134,8 @@ class Index(object):
 
     ##write city to disc
     def writeCityToDisk(self, city, pid):
+        if city.keys() == []:
+            return
         with open(self.postingListPath +'/' +"city" + str(pid) + ".txt", "w+") as out:
 
             for key in sorted(city.keys()):

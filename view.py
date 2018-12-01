@@ -72,7 +72,6 @@ class view(object):
         self.control.set_corpus_path(self.corpus_path)
         self.entry_corpus.delete('1.0', END)
         self.entry_corpus.insert(END, self.corpus_path)
-        self.b_browse_corpus.pack()
 
     def clik_on_browse_posting_and_dict(self, event):
         self.posting_path = filedialog.askdirectory()
