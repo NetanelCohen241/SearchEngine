@@ -3,25 +3,25 @@ class Document:
         self.docNumber=docNumber
         self.txt=txt
         self.city=city
-        self.cityLocations=[]
-        self.numOfUniqeTerms=0
-        self.maxTf=0
+        self.city_locations=[]
+        self.num_of_unique_terms=0
+        self.max_tf=0
         self.date_of_publish= ""
         self.title=""
 
-    def setMaxtf(self,max_tf):
-        self.maxTf=max_tf
+    def set_maxtf(self, max_tf):
+        self.max_tf=max_tf
 
-    def setNumOfUniqeTerms(self, numOfUniqeTerms):
-        self.numOfUniqeTerms=numOfUniqeTerms
+    def set_num_of_uniqe_terms(self, numOfUniqeTerms):
+        self.num_of_unique_terms=numOfUniqeTerms
 
-    def setTitle(self,title):
+    def set_title(self, title):
         self.title=title
 
-    def setDate(self,date):
+    def set_date(self, date):
         self.date_of_publish=date
 
-    def toString(self):
+    def to_string(self):
         return "{0}            {1}            {2}             {3}            {4}         {5}         {6}"\
-                .format(self.docNumber, self.city, self.cityLocations, self.numOfUniqeTerms, self.maxTf, self.date_of_publish, self.title)
+                .format(self.docNumber, self.city, self.city_locations, self.num_of_unique_terms, self.max_tf, self.date_of_publish, self.title)
 

@@ -12,31 +12,32 @@ class Term:
     def __init__(self):
         self.frq=0
         self.locations=[]
-        self.last_loc=0
+        # self.last_loc=0
 
 
     def toString(self):
-        return "{0} {1}".format(self.frq,self.locations)
+        return "{0},{1}".format(self.frq,self.locations)
 
 
 class Parser(object):
 
-    def __init__(self):
+    def __init__(self, stop_words_path):
 
         self.trm = []
         self.text=""
+        self.stop_words_path=stop_words_path
 
-    def parse(self, text, withStemming):
+    def parse(self, text, with_stemming):
 
-        docDictionary = {}
+        doc_dictionary = {}
         if text=="":
-            return docDictionary
+            return doc_dictionary
         self.text = self.clean_txt(text)
-        docDictionary = self.parseRules(self.text, docDictionary)
+        doc_dictionary = self.parseRules(doc_dictionary)
 
-        if withStemming is True:
-            docDictionary = self.stem(docDictionary)
-        return docDictionary
+        if with_stemming is True:
+            doc_dictionary = self.stem(doc_dictionary)
+        return doc_dictionary
 
     def str_to_number(self, num):
         """
@@ -207,19 +208,21 @@ class Parser(object):
 
         return tempDict
 
-    def parseRules(self, text, docDictionary):
+    def parseRules(self, docDictionary):
 
         i = 0
 
-        tokens = text.replace('--', '').split(' ')
-
-        with open("stop_words.txt", "r") as sw:
-            stopWords = sw.read()
+        tokens = self.text.split(' ')
+        stop_words={}
+        with open(self.stop_words_path+"/stop_words.txt", "r") as sw:
+            lines= sw.readlines()
+            for line in lines:
+                stop_words[line[:len(line)-1]]=""
             sw.close()
             while i < len(tokens):
 
                 try:
-                    if tokens[i].lower() in stopWords or tokens[i] in ['-', "--", ',', '.', ''] or tokens[i] == "/F":
+                    if tokens[i].lower() in stop_words or tokens[i] in ['-', "--", ',', '.', ''] or tokens[i] == "/F":
                         i = i + 1
                         continue
                     if tokens[i] == "0":
@@ -276,14 +279,14 @@ class Parser(object):
                                 if rangeTokens[0].lower() in size:
                                     # left value in range
                                     j, t = self.calcSize([tokens[i], rangeTokens[0]], 0)
-                                    self.addToDictionary(docDictionary,[t])
+                                    self.addToDictionary(docDictionary,[t],i)
                                     term = t
                                     acc = acc + 1
                                     if self.isNumber(rangeTokens[1]):
                                         # Number-Number
                                         if i + 2 < len(tokens) and tokens[i + 2].lower() in size:
                                             j, t2 = self.calcSize([rangeTokens[1], tokens[i + 2]], 0)
-                                            self.addToDictionary(docDictionary, [t2])
+                                            self.addToDictionary(docDictionary, [t2],i)
                                             term = term + "-" + t2
                                             i = i + acc + 1
                                         else:
@@ -326,14 +329,14 @@ class Parser(object):
                         elif i + 3 < len(tokens) and tokens[i].lower() == "between" and self.isNumber(tokens[i + 1]) and \
                                 tokens[i + 2].lower() == "and" and self.isNumber(tokens[i + 3]):
                             term = "between " + tokens[i + 1] + " and " + tokens[i + 3]
-                            self.addToDictionary(docDictionary, [tokens[i + 1], tokens[i + 3]])
+                            self.addToDictionary(docDictionary, [tokens[i + 1], tokens[i + 3]],i)
                             i = i + 3
                         # range
                         elif '-' in tokens[i]:
                             rangeTokens = tokens[i].split('-')
                             # Word-Word-Word
                             if len(rangeTokens) == 3:
-                                self.addToDictionary(docDictionary, [rangeTokens[0], rangeTokens[1], rangeTokens[2]])
+                                self.addToDictionary(docDictionary, [rangeTokens[0], rangeTokens[1], rangeTokens[2]],i)
                                 term = tokens[i]
                             else:
                                 t1 = rangeTokens[0]
@@ -359,18 +362,15 @@ class Parser(object):
                                     else:
                                         j, t2 = self.calcSize([rangeTokens[1]], 0)
                                 # add to terms list range right value and range left value
-                                self.addToDictionary(docDictionary,[t1, t2])
+                                self.addToDictionary(docDictionary,[t1, t2],i)
                                 if term == "":
                                     term = t1 + "-" + t2
                         else:
-                            term = tokens[i].replace(',', '').replace('.', '').replace('/', '').replace('-',
-                                                                                                        '').replace('=',
-                                                                                                                    '').replace(
-                                '_', '')
+                            term = tokens[i].replace(',', '').replace('.', '').replace('/', '').replace('-','')
                 except:
                     term = tokens[i]
                 try:
-                    self.addToDictionary(docDictionary, [term])
+                    self.addToDictionary(docDictionary, [term],i)
                 except:
                     print(tokens[i])
                 i = i + 1
@@ -378,7 +378,7 @@ class Parser(object):
             return docDictionary
 
 
-    def addToDictionary(self, docDictionary, terms):
+    def addToDictionary(self, docDictionary, terms, location):
 
         for i in range(len(terms)):
             term_data=Term()
@@ -390,8 +390,9 @@ class Parser(object):
             else:
                 docDictionary[terms[i]] = term_data
                 docDictionary[terms[i]].frq=1
-            docDictionary[terms[i]].locations.extend(self.find_all_locations(terms[i], docDictionary[terms[i]].last_loc))
-            docDictionary[terms[i]].last_loc = docDictionary[terms[i]].locations[-1]
+            docDictionary[terms[i]].locations.append(location)
+            location+=1
+            # docDictionary[terms[i]].last_loc = docDictionary[terms[i]].locations[-1]
 
 
 
@@ -414,7 +415,7 @@ class Parser(object):
     def clean_txt(self, text):
         to_replace = {':': '', '#': '', '&': '', '"': '', '!': '', '?': '', '*': '', '(': '', ')': '',
                       '[': '', ']': '', '{': '', '}': '', '\n': '', '|': '', '\'': '', '^': '', '@': '',
-                      '`': '', '+': '', '<': '', '>': '', ';': '', }
+                      '`': '', '+': '', '<': '', '>': '', ';': '', '--': '', '=': '' }
 
         size=len(text)
         ans=""

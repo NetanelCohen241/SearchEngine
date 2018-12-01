@@ -1,18 +1,20 @@
+import os
+
 import Reader
 import Parse
 
 class PostingElement(object):
 
-    def __init__(self, docNo, tf, inTitle):
-        self.docNo=docNo
-        self.tf=tf
-        self.inTitle=inTitle
+    def __init__(self, doc_no, term_details, in_title):
+        self.docNo=doc_no
+        self.termDetails=term_details
+        self.inTitle=in_title
 
-    def updateTf(self,tf):
-        self.tf=tf
+    def update_tf(self, tf):
+        self.termDetails=tf
 
-    def toString(self):
-        return self.docNo.replace(" ",'')+","+str(self.tf.toString())+","+str(self.inTitle)
+    def to_string(self):
+        return self.docNo.replace(" ",'') +"," + str(self.termDetails.to_string()) + "," + str(self.inTitle)
 
 
 class City(object):
@@ -21,64 +23,63 @@ class City(object):
         self.population=""
         self.name=""
 
-    def toString(self):
+    def to_string(self):
         return "{0}            {1}            {2}" \
             .format(self.name, self.currency, self.population)
 
 
 class Index(object):
 
-    def __init__(self,corpusPath,postingListPath,city_dict):
-        self.corpusPath=corpusPath
-        self.postingListPath=postingListPath
+    def __init__(self,corpus_path,posting_list_path,city_dict):
+        self.corpusPath=corpus_path
+        self.postingListPath=posting_list_path
         self.city_dict_from_api=city_dict
-        self.parser = Parse.Parser()
+        self.parser = Parse.Parser(corpus_path)
         # self.docs=[]
 
-    def createIndex(self,withStemming,pid):
+    def create_index(self, with_stemming, pid):
         """
         This function creates an inverted index.
-        :param withStemming: determines whether do stemming or not
+        :param with_stemming: determines whether do stemming or not
         :param pid: number of chunk to read.
         :return: a dictionary: key=term, value= how many the term appeared in the doc(tf)
         """
-        postingList = {}
-        ##create city dict{} key=city value=obj with relevent data api data + list docs
+        posting_list = {}
         city = {}
-        blockSize=40
+        block_size=40
         read=Reader.ReadFile(self.corpusPath)
-        docList=read.startAction(pid*blockSize,blockSize)
+        doc_list=read.startAction(pid*block_size,block_size)
 
-        for doc in docList:
-            docDictionary=self.parser.parse(doc.txt,withStemming)
-            doc.title=self.parser.parse(" ".join(doc.title),withStemming).keys()
-            doc.setNumOfUniqeTerms(len(docDictionary.keys()))
-            doc.setMaxtf(self.calcMaxTf(docDictionary))
-            self.insertToPostingList(postingList,docDictionary,doc)
+        for doc in doc_list:
+            doc_dictionary=self.parser.parse(doc.txt,with_stemming)
+            doc.title=self.parser.parse(" ".join(doc.title),with_stemming).keys()
+            doc.set_num_of_uniqe_terms(len(doc_dictionary.keys()))
+            doc.set_maxtf(self.calc_max_tf(doc_dictionary))
+            self.insert_to_posting_list(posting_list, doc_dictionary, doc)
             self.insert_to_city(city,doc)
-        self.writeCityToDisk(city,pid)
-        self.writeDocsToDisk(docList,pid)
-        self.writePostingListToDisk(postingList,pid)
+        self.write_city_to_disk(city, pid)
+        self.write_docs_to_disk(doc_list, pid)
+        self.write_posting_list_to_disk(posting_list, pid)
 
 
-    def insertToPostingList(self, postingList, docDictionary,doc):
+    def insert_to_posting_list(self, posting_list, doc_dictionary, doc):
         """
-
-        :param postingList:
-        :param docDictionary:
-        :param doc:
+        This function inserts an element into posting list
+        :param posting_list: dictionary of all documents- key=term value=doc numbers,tf,locations,whether the term is in doc title
+        :param doc_dictionary: element to insert
+        :param doc: doc object
         :return:
         """
-        for key in docDictionary.keys():
-            inTitle="F"
-            value=docDictionary[key]
+        for key in doc_dictionary.keys():
+            in_title="F"
+            term=doc_dictionary[key]
             if key in doc.title:
-                inTitle="T"
-            if postingList.__contains__(key):
-                postingList[key].append(PostingElement(doc.docNumber, value, inTitle))
+                in_title="T"
+            if posting_list.__contains__(key):
+                posting_list[key].append(PostingElement(doc.docNumber, term, in_title))
             else:
-                postingList[key] = []
-                postingList[key].append(PostingElement(doc.docNumber, value, inTitle))
+                posting_list[key] = []
+                posting_list[key].append(PostingElement(doc.docNumber, term, in_title))
 
     def insert_to_city(self, my_city, doc):
         if doc.city=="" or doc.city==[]:
@@ -96,52 +97,57 @@ class Index(object):
             city_obj.name = "N"
             city_obj.currency = "N"
             city_obj.population = "0"
-            my_city[doc_city] = city_obj
+        my_city[doc_city] = city_obj
 
 
-    def writePostingListToDisk(self, postingList, pid):
+    def write_posting_list_to_disk(self, postingList, pid):
         """
         This function sorts the posting list and writes it into the disk.
         :param postingList: given posting list
         :param pid:
         :return:
         """
-        with open(self.postingListPath +'/' +"posting" + str(pid) + ".txt", "w+") as out:
+        with open("posting" + str(pid) + ".txt", "w+", -1, "utf-8") as out:
 
             for key in sorted(postingList.keys()):
                 out.write(key+ ":")
                 for element in postingList[key]:
-                    out.write(element.toString()+ " ")
+                    out.write(element.to_string() + " ")
                 out.write("\n")
         out.close()
 
-    def calcMaxTf(self, docDictionary):
+    def calc_max_tf(self, doc_dictionary):
 
-        keys=docDictionary.keys()
+        keys=doc_dictionary.keys()
         max=0
         for key in keys:
-            if docDictionary[key].frq> max:
-                max=docDictionary[key].frq
+            if doc_dictionary[key].frq> max:
+                max=doc_dictionary[key].frq
 
         return max
 
-    def writeDocsToDisk(self, docList,pid):
+    def write_docs_to_disk(self, doc_list):
 
-        with open("docs.txt", "a") as out:
-            for doc in docList:
-                out.write(doc.toString()+"\n")
+        with open(self.postingListPath +'/' +"docs.txt", "a") as out:
+            for doc in doc_list:
+                out.write(doc.to_string() + "\n")
         out.close()
 
     ##write city to disc
-    def writeCityToDisk(self, city, pid):
-        if city.keys() == []:
+    def write_city_to_disk(self, city, pid):
+        if not city.keys():
             return
-        with open(self.postingListPath +'/' +"city" + str(pid) + ".txt", "w+") as out:
+        with open("city" + str(pid) + ".txt", "w+") as out:
 
             for key in sorted(city.keys()):
-                out.write(key+ ":           "+city[key].toString()+ " " )
+                out.write(key + ":           " + city[key].to_string() + " ")
                 out.write("\n")
         out.close()
+
+
+
+
+
 
 
 

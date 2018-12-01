@@ -3,23 +3,23 @@ import linecache
 
 class DictionaryElement(object):
 
-    def __init__(self,postingFile):
-        self.postingFile=postingFile
+    def __init__(self,posting_file):
+        self.postingFile=posting_file
         self.corpus_tf=0
         self.pointer=0
 
-    def toString(self):
+    def to_string(self):
         return self.postingFile+","+str(self.pointer)+","+str(self.corpus_tf)
 
 
 class Merger(object):
 
-    def __init__(self, filesToMergePath, chunkSize):
+    def __init__(self, files_to_merge_path, chunk_size):
 
-        self.filesToMergePath = filesToMergePath
-        self.chunkSize = chunkSize
+        self.files_to_merge_path = files_to_merge_path
+        self.chunk_size = chunk_size
         self.dictionary = {}
-        self.postingBlock = {}
+        self.posting_block = {}
         self.chunksListToMerge = []
         self.pointers = []
         self.filesNames=[]
@@ -31,22 +31,22 @@ class Merger(object):
         This function merge the files into one sorted file - posting list
         :return:
         """
-        self.filesNames = [word for word in os.listdir(self.filesToMergePath) if word.startswith(file_name)]
+        self.filesNames = [word for word in os.listdir(self.files_to_merge_path) if word.startswith(file_name)]
         terms = []
-        self.uploadAllFilesChunks()
+        self.upload_all_files_chunks()
         # insert into terms list the first term from each chunk
         for i in range(0, len(self.chunksListToMerge)):
             terms.append(self.chunksListToMerge[i][0][self.pointers[i]])
 
-        self.startMerge(terms)
-        self.writeMergeContentToDisk("postingTmp.txt")
+        self.start_merge(terms)
+        self.write_merge_content_to_disk("postingTmp.txt")
         # self.writeDictionaryToDisk()
         print("merge is done")
         # self.updatePointers()
-        self.clearUpperCase()
-        self.writeDictionaryToDisk()
+        self.clear_upper_case()
+        self.write_dictionary_to_disk()
 
-    def startMerge(self, terms):
+    def start_merge(self, terms):
         """
         This function implements the merge process.
         Upload the all files in chunks.
@@ -57,36 +57,36 @@ class Merger(object):
         :param terms:
         :return:
         """
-        postingListPointer = 1
-        while not self.hasFinished():
+        posting_list_pointer = 1
+        while not self.has_finished():
 
-            minTermIdx = self.findMin(terms)
-            term = self.chunksListToMerge[minTermIdx][0][self.pointers[minTermIdx] % self.chunkSize]
+            min_term_idx = self.find_min(terms)
+            term = self.chunksListToMerge[min_term_idx][0][self.pointers[min_term_idx] % self.chunk_size]
 
-            self.postingBlock[term] = ""
+            self.posting_block[term] = ""
             # iterate over each chunk, in every chunk that the term exists, append its content to postingBlock
             for i in range(0, len(self.chunksListToMerge)):
                 # check if we already uploaded the all file
                 if self.pointers[i] == -1:
                     continue
-                pos = self.pointers[i] % self.chunkSize
+                pos = self.pointers[i] % self.chunk_size
                 if self.chunksListToMerge[i][0][pos] == term:
                     #append term content to posting list
-                    self.postingBlock[term] += self.chunksListToMerge[i][1][pos]
+                    self.posting_block[term] += self.chunksListToMerge[i][1][pos]
                     self.pointers[i] += 1
-                    if self.pointers[i] % self.chunkSize == 0:
-                        self.uploadFileChunk(i)
+                    if self.pointers[i] % self.chunk_size == 0:
+                        self.upload_file_chunk(i)
                     if self.pointers[i] != -1:
-                        terms[i] = self.chunksListToMerge[i][0][self.pointers[i] % self.chunkSize]
+                        terms[i] = self.chunksListToMerge[i][0][self.pointers[i] % self.chunk_size]
 
 
-            self.AddToDictionary(term, postingListPointer)
+            self.add_to_dictionary(term, posting_list_pointer)
 
-            postingListPointer += 1
-            # if postingListPointer % 500000 == 0:
+            posting_list_pointer += 1
+            # if posting_list_pointer % 500000 == 0:
             #     self.writeMergeContentToDisk("postingTmp.txt")
 
-    def uploadAllFilesChunks(self):
+    def upload_all_files_chunks(self):
         """
         This function upload chunk(of lines) from each file(postinglist
         :return:
@@ -94,49 +94,49 @@ class Merger(object):
         for i in range(len(self.filesNames)):
             self.chunksListToMerge.append(0)
             self.pointers.append(0)
-            self.uploadFileChunk(i)
+            self.upload_file_chunk(i)
 
-    def uploadFileChunk(self, fileNumber):
+    def upload_file_chunk(self, file_number):
 
-        termDict = self.readlines(fileNumber, self.pointers[fileNumber], self.chunkSize)
-        self.chunksListToMerge[fileNumber] = termDict
+        term_dict = self.read_lines(file_number, self.pointers[file_number], self.chunk_size)
+        self.chunksListToMerge[file_number] = term_dict
 
-    def readlines(self, fileNumber, start, howManyToRead):
+    def read_lines(self, file_number, start, how_many_to_read):
         """
         This function read specific lines from a file.
-        :param fileName: the name of file to read from
+        :param file_number:
         :param start: from which line start to read
-        :param howManyToRead:
+        :param how_many_to_read:
         :return: dictionary
         """
-        fileName = self.filesToMergePath + '/' + self.filesNames[fileNumber]
+        file_name = self.filesNames[file_number]
         keys = []
         values = []
         if start < 0: return ''
         current_line_number = 0
         eof=True
-        for line in open(fileName):
-            if start <= current_line_number < start + howManyToRead:
+        for line in open(file_name):
+            if start <= current_line_number < start + how_many_to_read:
                 tmp = line.split(':')
                 keys.append(tmp[0])
                 values.append(tmp[1].replace('\n', ''))
                 eof=False
             current_line_number += 1
-            if current_line_number == start + howManyToRead:
+            if current_line_number == start + how_many_to_read:
                 break
         if eof:
-            self.pointers[fileNumber] = -1
+            self.pointers[file_number] = -1
             return [[""], [""]]
-        if current_line_number != start + howManyToRead:
-            for i in range(0,howManyToRead+start-current_line_number):
+        if current_line_number != start + how_many_to_read:
+            for i in range(0,how_many_to_read+start-current_line_number):
                 keys.insert(0,"")
                 values.insert(0,"")
-            self.pointers[fileNumber]=howManyToRead+start-(current_line_number%howManyToRead)
+            self.pointers[file_number]=how_many_to_read+start-(current_line_number%how_many_to_read)
 
 
         return [keys, values]
 
-    def findMin(self, terms):
+    def find_min(self, terms):
         """
         This function find the minimum value in list
         :param terms: list of terms
@@ -153,7 +153,7 @@ class Merger(object):
             i += 1
         return min
 
-    def hasFinished(self):
+    def has_finished(self):
 
         ans = True
         for i in range(len(self.pointers)):
@@ -162,49 +162,49 @@ class Merger(object):
                 break
         return ans
 
-    def writeMergeContentToDisk(self,fileName):
+    def write_merge_content_to_disk(self, file_name):
         """
         This function writes the posting list into the disc
         :return:
         """
-        with open(fileName, "a+",-1,"utf-8") as out:
-            for key in self.postingBlock.keys():
+        with open(file_name, "a+",-1,"utf-8") as out:
+            for key in self.posting_block.keys():
                 out.write(key + ":")
-                out.write(self.postingBlock[key] + '\n')
+                out.write(self.posting_block[key] + '\n')
         out.close()
-        self.postingBlock = {}
+        self.posting_block = {}
 
-    def writeDictionaryToDisk(self):
+    def write_dictionary_to_disk(self):
         """
         This function writes the dictionary into the disc
         :return:
         """
-        with open("dictionary.txt", "a+") as out:
+        with open(self.files_to_merge_path+"dictionary.txt", "a+") as out:
             for key in self.dictionary.keys():
                 out.write(key + ":")
-                out.write(self.dictionary[key].toString() + '\n')
+                out.write(self.dictionary[key].to_string() + '\n')
         out.close()
 
-    def AddToDictionary(self, term, postingListPointer):
+    def add_to_dictionary(self, term, posting_list_pointer):
 
         e=DictionaryElement("")
         if term=="" or str(term)[0].isupper():
             if self.dictionary.__contains__(term.lower()):
                 self.dictionary[term.upper()].pointer *= -1
 
-            elif self.postingBlock.keys().__contains__(str(term).upper()):
-                self.postingBlock[term.upper()]+=self.postingBlock[term]
+            elif self.posting_block.keys().__contains__(str(term).upper()):
+                self.posting_block[term.upper()]+=self.posting_block[term]
             else:
                 term = term.upper()
-                e.pointer=postingListPointer
+                e.pointer=posting_list_pointer
                 self.dictionary[term] = e
         else:
             if term.islower() and self.dictionary.__contains__(term.upper()):
                 self.dictionary[term.upper()].pointer *= -1
-            e.pointer = postingListPointer
+            e.pointer = posting_list_pointer
             self.dictionary[term] = e
 
-    def clearUpperCase(self):
+    def clear_upper_case(self):
         """
         This function responsible to merge term that appear multiple times in dictionary in different forms,
         for example: one time in uppercase and another time with lowercase.
@@ -240,7 +240,7 @@ class Merger(object):
         with open("key.txt","w+") as k:
             for key in keys_to_delete:
                 k.write(key+'\n')
-        with open("posting.txt", "w+") as newPosting:
+        with open(self.files_to_merge_path+"posting.txt", "w+") as newPosting:
             i = 0
             line_num=1
             continu=0
@@ -276,7 +276,7 @@ class Merger(object):
                 j+=1
         print(continu)
         newPosting.close()
-        # os.remove("postingTmp.txt")
+        # self.remove_tmp_files("posting")
 
     def calculateTotalTf(self, line):
 
@@ -291,4 +291,32 @@ class Merger(object):
         except:
             print(line)
         return term_corpus_frequency
+
+    def city_index(self):
+
+        city_files = [word for word in os.listdir(os.getcwd()) if word.startswith("city")]
+        cities = {}
+        # build cities dictionary
+        for i in range(len(city_files)):
+            with open(city_files[i], "r") as c:
+                lines = c.readlines()
+                for line in lines:
+                    city = line.split(":")
+                    if not cities.__contains__(city[0]):
+                        cities[city[0]] = city[1]+" "+str(self.dictionary[city[0].upper()].pointer)
+
+        #write cities to disk
+        with open(self.files_to_merge_path+"/cities.txt","w+") as c:
+            for city in cities:
+                c.write(city+": "+ cities[city])
+            c.close()
+        self.remove_tmp_files("city")
+
+    def remove_tmp_files(self,file_name):
+
+        files = [word for word in os.listdir(os.getcwd()) if word.startswith(file_name)]
+        for file in files:
+            os.remove(file)
+
+
 

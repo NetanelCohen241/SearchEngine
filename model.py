@@ -80,7 +80,7 @@ class model(object):
 
     def index(self, index_element):
         idx = Indexer.Index(index_element.courpus_path, index_element.posting_path, self.cities_from_api)
-        idx.createIndex(index_element.stem, index_element.id)
+        idx.create_index(index_element.stem, index_element.id)
 
     def start_index(self,corpus_path,posting_path,stem):
         processes = []
