@@ -33,13 +33,13 @@ class Parser(object):
         self.max_tf=0
         doc_dictionary = {}
         if text=="":
-            return doc_dictionary
+            return doc_dictionary,self.max_tf
         self.text = self.clean_txt(text)
         doc_dictionary = self.parseRules(doc_dictionary)
 
         if with_stemming is True:
             doc_dictionary = self.stem(doc_dictionary)
-        return doc_dictionary
+        return doc_dictionary,self.max_tf
 
     def str_to_number(self, num):
         """
@@ -393,7 +393,7 @@ class Parser(object):
                     y=5
                 i = i + 1
 
-            return docDictionary,self.max_tf
+            return docDictionary
 
 
     def addToDictionary(self, docDictionary, terms, location):

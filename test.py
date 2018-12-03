@@ -50,6 +50,7 @@ print("Hello Sugar")
 #
 
 
+
 if __name__ == '__main__':
 
 
@@ -70,8 +71,9 @@ if __name__ == '__main__':
 
 
     # starttime = time.time()
-    # merger=FileMerge.Merger("D:\iretrival\merge",1500)
-    # merger.merge("posting")
+    merger=FileMerge.Merger("D:\iretrival\merge",1500)
+    merger.merge("posting")
+    merger.city_index()
     # print(time.time() - starttime)
 
     # with open("D:\iretrival\merge/dictionary.txt","r") as d:

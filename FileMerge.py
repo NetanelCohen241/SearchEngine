@@ -179,6 +179,42 @@ class Merger(object):
         return [keys, values]
 
 
+    def read_lines2(self, file_number, start, how_many_to_read):
+        """
+        This function read specific lines from a file.
+        :param file_number:
+        :param start: from which line start to read
+        :param how_many_to_read:
+        :return: dictionary
+        """
+        file_name = self.files_names[file_number]
+        keys = []
+        values = []
+        if start < 0: return ''
+        current_line_number = start
+        eof = True
+        for i in range(start,how_many_to_read):
+            line=linecache.getline(file_name,i)
+            if line== "":
+                break
+            tmp = line.split(':')
+            keys.append(tmp[0])
+            values.append(tmp[1].replace('\n', ''))
+            eof = False
+            current_line_number += 1
+
+        if eof:
+            self.pointers[file_number] = -1
+            return [[""], [""]]
+        if current_line_number != start + how_many_to_read:
+            for i in range(0, how_many_to_read + start - current_line_number):
+                keys.insert(0, "")
+                values.insert(0, "")
+            self.pointers[file_number] = how_many_to_read + start - (current_line_number % how_many_to_read)
+
+        return [keys, values]
+
+
     def has_finished(self):
 
         ans = True
@@ -211,10 +247,11 @@ class Merger(object):
                 out.write(self.dictionary[key].to_string() + '\n')
         out.close()
 
-    def __add_to_dictionary(self, term, posting_file, posting_list_pointer):
+    def __add_to_dictionary(self, term, posting_file, posting_list_pointer, tf):
 
         e = DictionaryElement(posting_file)
         e.pointer = posting_list_pointer
+        e.corpus_tf=tf
         self.dictionary[term] = e
 
 

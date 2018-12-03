@@ -7,7 +7,7 @@ class Document:
         self.num_of_unique_terms=0
         self.max_tf=0
         self.date_of_publish= ""
-        self.title=""
+        self.title=[]
         self.language=""
 
     def set_maxtf(self, max_tf):

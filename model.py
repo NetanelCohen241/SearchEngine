@@ -11,11 +11,12 @@ import Indexer
 
 class indexElement(object):
 
-    def __init__(self,id,courpus_path,posting_path,stem):
+    def __init__(self,id,courpus_path,posting_path,stem,block_size):
         self.id=id
         self.courpus_path=courpus_path
         self.posting_path=posting_path
         self.stem=stem
+        self.block_size=block_size
 
 
 class model(object):
@@ -73,15 +74,20 @@ class model(object):
 
     def index(self, index_element):
         idx = Indexer.Index(index_element.courpus_path, index_element.posting_path, self.cities_from_api)
-        idx.create_index(index_element.stem, index_element.id)
+        idx.create_index(index_element.stem, index_element.id, index_element.block_size)
 
     def start_index(self,corpus_path,posting_path,stem):
 
-        processes = []
+        files_number=len([word for word in os.listdir(corpus_path) if os.path.isdir(corpus_path+"/"+word)])
+        s=files_number/40
         tasks = []
-        for i in range(0, 363):
-            index_element=indexElement(i,corpus_path,posting_path,stem)
+        i=0
+        while i<int(s):
+            index_element=indexElement(i,corpus_path,posting_path,stem,40)
             tasks.append(index_element)
+            i+=1
+        if files_number%40>0:
+            tasks.append(indexElement(i,corpus_path,posting_path,stem,files_number%40>0))
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()) - 1)
         pool.map(self.index, tasks)

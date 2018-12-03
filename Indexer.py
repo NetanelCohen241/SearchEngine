@@ -86,6 +86,7 @@ class Index(object):
         if doc.city=="" or doc.city==[]:
             return
         doc_city=doc.city.lower()
+        doc_city=doc_city.replace('(','').replace(')','')
         if doc_city in my_city.keys():
             return
         city_obj = City()
@@ -98,7 +99,7 @@ class Index(object):
             city_obj.name = "N"
             city_obj.currency = "N"
             city_obj.population = "0"
-        my_city[doc_city] = city_obj
+        my_city[doc_city.upper()] = city_obj
 
 
     def write_posting_list_to_disk(self, postingList, pid):
@@ -142,7 +143,7 @@ class Index(object):
             return
         with open("city" + str(pid) + ".txt", "w+") as out:
 
-            for key in sorted(city.keys()):
+            for key in city.keys():
                 out.write(key + ":           " + city[key].to_string() + " ")
                 out.write("\n")
         out.close()
