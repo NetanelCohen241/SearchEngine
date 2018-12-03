@@ -140,11 +140,15 @@ class Index(object):
         out.close()
 
     def write_language_to_disk(self, doc_list):
-
+        print ("start")
         with open("language.txt", "a") as out:
             for doc in doc_list:
-                out.write(doc.language + "\n")
+                if doc.language != "None":
+                    out.write(doc.language + "\n")
+                else:
+                    continue
         out.close()
+        print("end")
 
     ##write city to disc
     def write_city_to_disk(self, city, pid):
