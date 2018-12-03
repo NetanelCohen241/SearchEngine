@@ -32,8 +32,8 @@ class model(object):
         with open("docs.txt", "w+") as out:
             out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
-        with open("cites.txt", "w+") as fout:
-            fout.write("City            stateName             currency          population          docId:locations\n")
+        with open("language.txt", "w+") as fout:
+            pass
         fout.close()
 
     def set_corpus_path(self,path):
@@ -74,7 +74,7 @@ class model(object):
 
     def index(self, index_element):
         idx = Indexer.Index(index_element.courpus_path, index_element.posting_path, self.cities_from_api)
-        idx.create_index(index_element.stem, index_element.id, index_element.block_size)
+        idx.create_index(index_element.stem, index_element.id,index_element.block_size)
 
     def start_index(self,corpus_path,posting_path,stem):
 
@@ -87,7 +87,7 @@ class model(object):
             tasks.append(index_element)
             i+=1
         if files_number%40>0:
-            tasks.append(indexElement(i,corpus_path,posting_path,stem,files_number%40>0))
+            tasks.append(indexElement(i,corpus_path,posting_path,stem,files_number%40))
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()) - 1)
         pool.map(self.index, tasks)

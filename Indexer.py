@@ -47,6 +47,7 @@ class Index(object):
         """
         posting_list = {}
         city = {}
+        language={}
         read=Reader.ReadFile(self.corpusPath)
         doc_list=read.startAction(pid*block_size,block_size)
 
@@ -60,6 +61,7 @@ class Index(object):
             self.insert_to_city(city,doc)
         self.write_city_to_disk(city, pid)
         self.write_docs_to_disk(doc_list)
+        self.write_language_to_disk(doc_list)
         self.write_posting_list_to_disk(posting_list, pid)
 
 
@@ -135,6 +137,13 @@ class Index(object):
         with open(self.postingListPath +'/' +"docs.txt", "a") as out:
             for doc in doc_list:
                 out.write(doc.to_string() + "\n")
+        out.close()
+
+    def write_language_to_disk(self, doc_list):
+
+        with open("language.txt", "a") as out:
+            for doc in doc_list:
+                out.write(doc.language + "\n")
         out.close()
 
     ##write city to disc
