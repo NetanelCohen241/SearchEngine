@@ -37,28 +37,29 @@ class Index(object):
         self.parser = Parse.Parser(corpus_path)
         # self.docs=[]
 
-    def create_index(self, with_stemming, pid):
+    def create_index(self, with_stemming, pid, block_size):
         """
         This function creates an inverted index.
+        :param block_size:
         :param with_stemming: determines whether do stemming or not
         :param pid: number of chunk to read.
         :return: a dictionary: key=term, value= how many the term appeared in the doc(tf)
         """
         posting_list = {}
         city = {}
-        block_size=40
         read=Reader.ReadFile(self.corpusPath)
         doc_list=read.startAction(pid*block_size,block_size)
 
         for doc in doc_list:
-            doc_dictionary=self.parser.parse(doc.txt,with_stemming)
-            doc.title=self.parser.parse(" ".join(doc.title),with_stemming).keys()
+            doc_dictionary,max_tf=self.parser.parse(doc.txt+" "+doc.city,with_stemming)
+            doc.title,z=self.parser.parse(" ".join(doc.title),with_stemming)
+            doc.title=doc.title.keys()
             doc.set_num_of_uniqe_terms(len(doc_dictionary.keys()))
-            doc.set_maxtf(self.calc_max_tf(doc_dictionary))
+            doc.set_maxtf(max_tf)
             self.insert_to_posting_list(posting_list, doc_dictionary, doc)
             self.insert_to_city(city,doc)
         self.write_city_to_disk(city, pid)
-        self.write_docs_to_disk(doc_list, pid)
+        self.write_docs_to_disk(doc_list)
         self.write_posting_list_to_disk(posting_list, pid)
 
 
@@ -109,7 +110,9 @@ class Index(object):
         """
         with open("posting" + str(pid) + ".txt", "w+", -1, "utf-8") as out:
 
-            for key in sorted(postingList.keys()):
+            for key in sorted(postingList.keys(), key=str.lower):
+                if key == "":
+                    continue
                 out.write(key+ ":")
                 for element in postingList[key]:
                     out.write(element.to_string() + " ")

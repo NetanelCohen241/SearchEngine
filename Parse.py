@@ -15,7 +15,7 @@ class Term:
         # self.last_loc=0
 
 
-    def toString(self):
+    def to_string(self):
         return "{0},{1}".format(self.frq,self.locations)
 
 
@@ -26,9 +26,11 @@ class Parser(object):
         self.trm = []
         self.text=""
         self.stop_words_path=stop_words_path
+        self.max_tf=0
 
     def parse(self, text, with_stemming):
 
+        self.max_tf=0
         doc_dictionary = {}
         if text=="":
             return doc_dictionary
@@ -212,7 +214,7 @@ class Parser(object):
 
         i = 0
 
-        tokens = self.text.split(' ')
+        tokens = self.text.replace("--","").replace("/F","").split(' ')
         stop_words={}
         with open(self.stop_words_path+"/stop_words.txt", "r") as sw:
             lines= sw.readlines()
@@ -220,7 +222,7 @@ class Parser(object):
                 stop_words[line[:len(line)-1]]=""
             sw.close()
             while i < len(tokens):
-
+                term=""
                 try:
                     if tokens[i].lower() in stop_words or tokens[i] in ['-', "--", ',', '.', ''] or tokens[i] == "/F":
                         i = i + 1
@@ -343,8 +345,8 @@ class Parser(object):
                                 t2 = rangeTokens[1]
                                 if self.isNumber(rangeTokens[0]):
                                     # Number -
-                                    if rangeTokens[0].startswith('0'):
-                                        t1 = rangeTokens[0][:2] + ":" + rangeTokens[0][2:]
+                                    if tokens[i+1]=="GMT":
+                                        t1 = rangeTokens[0][:2] + "_" + rangeTokens[0][2:]
                                     else:
                                         j, t1 = self.calcSize(rangeTokens, 0)
                                     if rangeTokens[1] == "percent":
@@ -352,7 +354,7 @@ class Parser(object):
 
                                 if self.isNumber(rangeTokens[1]):
                                     # - Number
-                                    if rangeTokens[1].startswith('0'):
+                                    if tokens[i+1]=="GMT":
                                         t2 = rangeTokens[1][:2] + "_" + rangeTokens[1][2:]
                                         if i + 1 < len(tokens) and tokens[i + 1].replace(",", '') == "GMT":
                                             i = i + 1
@@ -366,30 +368,34 @@ class Parser(object):
                                 if term == "":
                                     term = t1 + "-" + t2
                         else:
-                            term = tokens[i].replace(',', '').replace('.', '').replace('/', '').replace('-','')
+                            term = tokens[i].replace('_','').replace(',', '').replace('.', '').replace('/', ' ').replace('-','')
+
                 except:
+                    # print(tokens[i])
                     term = tokens[i]
                 try:
+
                     self.addToDictionary(docDictionary, [term],i)
                 except:
-                    print(tokens[i])
+                    y=5
                 i = i + 1
 
-            return docDictionary
+            return docDictionary,self.max_tf
 
 
     def addToDictionary(self, docDictionary, terms, location):
 
+
         for i in range(len(terms)):
             term_data=Term()
             if docDictionary.__contains__(terms[i]):
-                # docDictionary[terms[i]] += 1
-                # docDictionary[terms[i]] = term
                 docDictionary[terms[i]].frq += 1
 
             else:
                 docDictionary[terms[i]] = term_data
                 docDictionary[terms[i]].frq=1
+            if self.max_tf<docDictionary[terms[i]].frq:
+                self.max_tf=docDictionary[terms[i]].frq
             docDictionary[terms[i]].locations.append(location)
             location+=1
             # docDictionary[terms[i]].last_loc = docDictionary[terms[i]].locations[-1]
@@ -415,7 +421,7 @@ class Parser(object):
     def clean_txt(self, text):
         to_replace = {':': '', '#': '', '&': '', '"': '', '!': '', '?': '', '*': '', '(': '', ')': '',
                       '[': '', ']': '', '{': '', '}': '', '\n': '', '|': '', '\'': '', '^': '', '@': '',
-                      '`': '', '+': '', '<': '', '>': '', ';': '', '--': '', '=': '' }
+                      '`': '', '+': '', '<': '', '>': '', ';': '', '=': '' }
 
         size=len(text)
         ans=""

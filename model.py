@@ -83,9 +83,10 @@ class model(object):
         idx.create_index(index_element.stem, index_element.id)
 
     def start_index(self,corpus_path,posting_path,stem):
+
         processes = []
         tasks = []
-        for i in range(0, 45):
+        for i in range(0, 363):
             index_element=indexElement(i,corpus_path,posting_path,stem)
             tasks.append(index_element)
         starttime = time.time()

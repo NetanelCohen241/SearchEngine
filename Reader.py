@@ -46,7 +46,7 @@ class ReadFile(object):
         """
         ans = []
         docList = txt.split("</DOC>")
-        docCity=[]
+        docCity=""
         for i in docList:
             if i=="\n" or i=="\n\n" or i=="\n\n\n" or i=="\n\n\n\n":
                 break
