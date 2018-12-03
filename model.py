@@ -48,13 +48,6 @@ class model(object):
             os.remove(path+"/"+str(file))
         self.term_dictionary.clear()
 
-    def dat(self):
-        return self.data
-
-    def add(self, value):
-        print("old value:{0} ".format(self.data))
-        self.data=int(value)
-        print("new value:{0} ".format(self.data))
 
     def read_dictionary_from_file(self,path):
         with open(path+"/dictionary.txt","r") as f:

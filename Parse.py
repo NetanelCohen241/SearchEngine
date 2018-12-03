@@ -49,6 +49,17 @@ class Parser(object):
         """
         return ast.literal_eval("".join(num.split(",")))
 
+    def clear_zeros(self, num):
+        i = 0
+        size=len(num)
+        for idx in range(0,size):
+            if num[idx] == '0' and idx+1 < size and num[idx+1] != ".":
+                i = i + 1
+        if i== size:
+            return "0"
+        return num[i:]
+
+
     def calcSize(self, tokens, i):
         """
         this methode assest the size of the number
@@ -59,12 +70,13 @@ class Parser(object):
         and return the last index the function work on
         """
         # print(tokens[i])
+        tokens[i]=self.clear_zeros(tokens[i])
         term = ""
         fraction = ""
         if self.isFraction(tokens[i]):
             return i, tokens[i]
-        if tokens[i].startswith('0') and tokens[i].isdigit():
-            return i, tokens[i]
+        # if tokens[i].startswith('0') and tokens[i].isdigit():
+        #     return i, tokens[i]
         sizes = {"thousand": 1000, "million": 1000000, "billion": 1000000000, "trillion": 1000000000000}
         x = self.str_to_number(tokens[i])
         if i + 1 < len(tokens):
@@ -85,19 +97,19 @@ class Parser(object):
             if x % 1000 == 0:
                 term = str(int(x / sizes["thousand"])) + "K"
             else:
-                term = "{0:.3f}".format(x / sizes["thousand"]) + "K"
+                term = "{0:.2f}".format(x / sizes["thousand"]) + "K"
 
         elif sizes["million"] <= x < sizes["billion"]:
             if x % sizes["million"] == 0:
                 term = str(int(x / sizes["million"])) + "M"
             else:
-                term = "{0:.3f}".format(x / sizes["million"]) + "M"
+                term = "{0:.2f}".format(x / sizes["million"]) + "M"
 
         elif x >= sizes["billion"]:
             if x % sizes["billion"] == 0:
                 term = str(int(x / sizes["billion"])) + "B"
             else:
-                term = "{0:.3f}".format((x / sizes["billion"])) + "B"
+                term = "{0:.2f}".format((x / sizes["billion"])) + "B"
 
         return i, term
 
@@ -151,6 +163,7 @@ class Parser(object):
     # change to push
     def calcPrice(self, tokens, i, flag):
 
+        tokens[i] = self.clear_zeros(tokens[i])
         term = ""
         fraction = " "
         alreadyAdd = False
@@ -185,7 +198,7 @@ class Parser(object):
                 term = str(int(x / sizes["million"])) + "M"
                 # i=i+1
             else:
-                term = "{0:.3f}".format(x / sizes["million"]) + "M"
+                term = "{0:.2f}".format(x / sizes["million"]) + "M"
         # i=i+1
         if flag and not alreadyAdd:
             term += " Dollars"
