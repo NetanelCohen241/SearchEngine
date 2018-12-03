@@ -55,6 +55,8 @@ class Parser(object):
         for idx in range(0,size):
             if num[idx] == '0' and idx+1 < size and num[idx+1] != ".":
                 i = i + 1
+            else:
+                break
         if i== size:
             return "0"
         return num[i:]
