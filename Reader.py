@@ -47,8 +47,9 @@ class ReadFile(object):
         ans = []
         docList = txt.split("</DOC>")
         docCity=""
+        doc_language="None"
         for i in docList:
-            if i=="\n" or i=="\n\n" or i=="\n\n\n" or i=="\n\n\n\n":
+            if i=="\n" or i=="\n\n" or i=="\n\n\n" or i=="\n\n\n\n" or i=="":
                 break
             try:
                 docNumber = re.findall(r'<DOCNO>(.*?)</DOCNO>', i)[0].replace(" ","")
@@ -61,6 +62,8 @@ class ReadFile(object):
                 textContent=""
                 if i.__contains__("<TEXT>"):
                     textContent = (i.split("<TEXT>")[1]).split("</TEXT>")[0]
+                    if textContent.__contains__("<F P=105>"):
+                        doc_language = re.findall(r'<F P=105>(.*?)</F>', textContent)[0]
                 doc = Doc.Document(docNumber, textContent, docCity)
                 # if doc.city != "" and docCity!=[]:
                 #     self.find_all_locations_in_text(doc)
@@ -70,22 +73,8 @@ class ReadFile(object):
                 if i.__contains__("<TI>"):
                     title = (i.split("<TI>")[1]).split("</TI>")[0].split()
                     doc.set_title(title)
+                doc.set_language(doc_language)
                 ans.append(doc)
             except:
                 print("error")
         return ans
-
-    def find_all_locations_in_text(self, doc):
-        """
-        This function finds the city locations in the text.
-        :param doc: The document where the function has to find city locations
-        :return:
-        """
-        text=doc.txt.lower()
-        start = 0
-        while True:
-            start = text.find(doc.city.lower(), start)
-            if start == -1:
-                break
-            doc.cityLocations.append(start)
-            start += len(doc.city)

@@ -8,6 +8,7 @@ class Document:
         self.max_tf=0
         self.date_of_publish= ""
         self.title=""
+        self.language=""
 
     def set_maxtf(self, max_tf):
         self.max_tf=max_tf
@@ -20,6 +21,10 @@ class Document:
 
     def set_date(self, date):
         self.date_of_publish=date
+
+    def set_language(self, lan):
+        self.language = lan
+
 
     def to_string(self):
         return "{0}            {1}            {2}             {3}            {4}         {5}         {6}"\
