@@ -29,6 +29,7 @@ class Parser(object):
         self.max_tf=0
         self.location=0
 
+
     def parse(self, text, with_stemming):
         """
         This function manage the parsing process.

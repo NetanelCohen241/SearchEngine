@@ -18,36 +18,35 @@ import FileMerge
 #
 #     idx = Indexer.Index("D:\iretrival\corpus", "D:\iretrival\posting",mod.cities_from_api)
 #     idx.createIndex(False,pid)
+import Reader
 
 import model
 print("Hello Sugar")
 
 
 if __name__ == '__main__':
-
-
-    numbers=[]
-    for i in range(0,45):
-        numbers.append(i)
-    # starttime = time.time()
-    # pool = Pool(processes=(multiprocessing.cpu_count())-1)
-    # pool.map(index, numbers)
-    # print(time.time()-starttime)
-
-
-    # starttime = time.time()
-    mod=model.model()
-    mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",True)
-    # print(time.time() - starttime)
+    # num_of_None_capital=0
+    # total=0
+    # with open("D:\iretrival\posting\dictionary.txt","r") as f:
+    #     text = f.readlines()
+    #     for line in text:
+    #        if line.split()[3] == "0":
+    #            num_of_None_capital += 1
+    #        total += 1
     #
-    #
-    # starttime = time.time()
-    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
-    # merger.merge("posting")
-    # # merger.upload_dictionary()
-    # merger.city_index()
-    # merger.language_index()
-    # print(time.time() - starttime)
+    # print("number of None capital city: {0}\nTotal cities: {1}".format(num_of_None_capital,total))
+    # stop_words = {}
+    # with open("D:\iretrival\corpus" + "/stop_words.txt", "r") as sw:
+    #     lines = sw.readlines()
+    #     for line in lines:
+    #         stop_words[line[:len(line) - 1]] = ""
+    #     sw.close()
+    # p=Parse.Parser(stop_words)
+    # r=Reader.ReadFile("D:\iretrival\corpus")
+    # doc_list=r.startAction(0,1815)
+    # for doc in doc_list:
+    #     p.parse(doc.txt,False)
+    # print(p.count_numbers)
 
-
+    print(len(x))
 

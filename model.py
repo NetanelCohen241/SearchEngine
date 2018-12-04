@@ -92,15 +92,15 @@ class model(object):
                 stop_words[line[:len(line) - 1]] = ""
             sw.close()
         files_number = len([word for word in os.listdir(self.corpus_path) if os.path.isdir(self.corpus_path + "/" + word)])
-        s = files_number / 100
+        s = files_number / 40
         tasks = []
         i = 0
         while i < int(s):
-            index_element = IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, 100, stop_words)
+            index_element = IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, 40, stop_words)
             tasks.append(index_element)
             i += 1
-        if files_number % 100 > 0:
-            tasks.append(IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, files_number % 100, stop_words))
+        if files_number % 40 > 0:
+            tasks.append(IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, files_number % 40, stop_words))
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()))
         pool.map(self.index, tasks)
