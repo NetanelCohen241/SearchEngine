@@ -134,6 +134,7 @@ def main():
     root = Tk()
     root.title("Search Engine")
     root.geometry("1000x250")
+    root.resizable(0,0)
     Model = model()
     Control = contoller.controller( Model )
     View = view(root, Control)
