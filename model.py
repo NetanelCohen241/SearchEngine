@@ -41,7 +41,7 @@ class model(object):
 
     def set_posting_and_dictionary_path(self, path):
         self.posting_and_dictionary_path = path
-        with open("docs.txt", "w+") as out:
+        with open(path+"/docs.txt", "w+") as out:
             out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
 
@@ -89,7 +89,6 @@ class model(object):
         s = files_number / 40
         tasks = []
         i = 0
-        language={}
         while i < int(s):
             index_element = IndexElement(i, corpus_path, posting_path, stem, 40, stop_words)
             tasks.append(index_element)
@@ -100,20 +99,6 @@ class model(object):
         pool = Pool(processes=(multiprocessing.cpu_count()))
         pool.map(self.index, tasks)
         print(time.time() - starttime)
-        # tasks=[]
-        #
-        # files_number = len([word for word in os.listdir(os.getcwd()) if word.startswith()])
-        # s = files_number / 40
-        # tasks = []
-        # i = 0
-        # while i < int(s):
-        #     index_element = indexElement(i, corpus_path, posting_path, stem, 40, stop_words)
-        #     tasks.append(index_element)
-        #     i += 1
-        # if files_number % 40 > 0:
-        #     tasks.append(indexElement(i, corpus_path, posting_path, stem, files_number % 40, stop_words))
-        #
-        #
-        # pool.map(self.merge, tasks)
+
 
 

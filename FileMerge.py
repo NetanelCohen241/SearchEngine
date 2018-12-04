@@ -3,6 +3,8 @@ import linecache
 import time
 import heapq
 
+from Parse import Parser
+
 
 class MyHeap(object):
     def __init__(self, initial=None, key=lambda x: x):
@@ -65,7 +67,7 @@ class Merger(object):
 
         self.start_merge(terms)
         self.write_dictionary_to_disk()
-        # self.__remove_tmp_files(file_name)
+        self.__remove_tmp_files(file_name)
 
     def start_merge(self, terms):
         """
@@ -279,7 +281,7 @@ class Merger(object):
             for city in cities:
                 c.write(city + ": " + cities[city]+'\n')
             c.close()
-        # self.__remove_tmp_files("city")
+        self.__remove_tmp_files("city")
 
     def language_index(self):
 
@@ -288,9 +290,9 @@ class Merger(object):
         language={}
         while line!="":
             line=linecache.getline("language.txt",i).split()
-            if len(line)==0:
+            if len(line)==0 or Parser.isNumber(line):
                 break
-            line=line[0].replace(',','')
+            line=line[0].replace(',','').lower()
             if not language.__contains__(line):
                 language[line]=""
             i+=1
@@ -299,6 +301,7 @@ class Merger(object):
             for key in language:
                 out.write(key+'\n')
         out.close()
+        self.__remove_tmp_files("language.txt")
 
     def __remove_tmp_files(self, file_name):
 

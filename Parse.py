@@ -14,7 +14,7 @@ class Term:
 
     def to_string(self):
         ans="["+str(self.locations[0])
-        for i in range(len(self.locations)):
+        for i in range(1,len(self.locations)):
             ans+=","+str(self.locations[i])
         return ans+"]"
 

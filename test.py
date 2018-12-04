@@ -67,8 +67,8 @@ if __name__ == '__main__':
 
 
     # starttime = time.time()
-    # mod=model.model()
-    # mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
+    mod=model.model()
+    mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
     # print(time.time() - starttime)
 
 
