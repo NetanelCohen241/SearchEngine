@@ -11,7 +11,7 @@ import contoller
 class view(object):
 
     def __init__(self, master, control):
-        #view class members
+        #view classss members
         self.control = control
         self.master = master
         self.stemFlag = IntVar()

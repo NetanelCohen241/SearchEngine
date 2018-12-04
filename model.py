@@ -110,7 +110,7 @@ class model(object):
         if stem:
             file_name+="WithStemming"
         merger.merge(file_name)
-        # merger.upload_dictionary()
+        # merger.uploaddd_dictionary()
         merger.city_index()
         merger.language_index()
         print(time.time() - starttime)

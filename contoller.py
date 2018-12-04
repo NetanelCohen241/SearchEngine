@@ -18,7 +18,7 @@ class controller(object):
 
     def get_dict_data(self):
         """
-        :param path: path of the location of the ductionary
+        :param path: path of the location of the ductionary.
         :return:
         """
         dictionary= self.model.get_dictionary()
@@ -61,11 +61,11 @@ class controller(object):
         """
         self.model.set_posting_and_dictionary_path(path)
 
-    def load_dictionary(self,path,stem_flag):
+    def load_dictionary(self,path):
         """
         reade dictionary to the RAM using the given path
         :param path: the path of the directory that contain dictionary.txt
         :return:
         """
-        return self.model.read_dictionary_from_file(path,stem_flag)
+        return self.model.read_dictionary_from_file(path)
 
