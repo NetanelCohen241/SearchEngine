@@ -39,15 +39,15 @@ if __name__ == '__main__':
     mod=model.model()
     mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",True)
     # print(time.time() - starttime)
-
-
-    starttime = time.time()
-    merger=FileMerge.Merger("D:\iretrival\posting",2000)
-    merger.merge("posting")
-    # merger.upload_dictionary()
-    merger.city_index()
-    merger.language_index()
-    print(time.time() - starttime)
+    #
+    #
+    # starttime = time.time()
+    # merger=FileMerge.Merger("D:\iretrival\posting",2000)
+    # merger.merge("posting")
+    # # merger.upload_dictionary()
+    # merger.city_index()
+    # merger.language_index()
+    # print(time.time() - starttime)
 
 
 

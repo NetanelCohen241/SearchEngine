@@ -44,7 +44,7 @@ class Parser(object):
         self.text = self.clean_txt(text)
         doc_dictionary = self.parse_rules(doc_dictionary)
 
-        if with_stemming is True:
+        if with_stemming:
             doc_dictionary = self.stem(doc_dictionary)
         return doc_dictionary,self.max_tf
 
@@ -164,9 +164,6 @@ class Parser(object):
         # 1st- regular expression that detect number like X,YYY  or X,YYY.ZZ
         return re.match("^(\d+|\d{1,3}(,\d{3})*)(\.\d+)?$", token) or self.isFraction(token)
 
-    # def isFraction(self, token):
-    #     # regular expression that can detect fraction from the pattern X/Y
-    #     return re.match("([1-9]\/[1-9])", token)
 
     # return price term according price term rules
     # change to push
@@ -229,9 +226,11 @@ class Parser(object):
             else:
                 term= key
             if temp_dict.__contains__(term):
-                temp_dict[term] += len(doc_dictionary[key])
+                temp_dict[term].locations.extend(doc_dictionary[key].locations)
             else:
-                temp_dict[term] = len(doc_dictionary[key])
+                t=Term()
+                t.locations=doc_dictionary[key].locations
+                temp_dict[term] = t
 
         return temp_dict
 

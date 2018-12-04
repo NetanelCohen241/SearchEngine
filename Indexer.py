@@ -112,6 +112,7 @@ class Index(object):
     def write_posting_list_to_disk(self, posting_list, pid, with_stemming):
         """
         This function sorts the posting list and writes it into the disk.
+        :param with_stemming:
         :param posting_list: given posting list
         :param pid:
         :return:
