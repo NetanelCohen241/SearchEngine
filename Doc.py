@@ -27,6 +27,6 @@ class Document:
 
 
     def to_string(self):
-        return "{0}            {1}            {2}             {3}            {4}         {5}         {6}"\
-                .format(self.docNumber, self.city, self.city_locations, self.num_of_unique_terms, self.max_tf, self.date_of_publish, self.title)
+        return "{0}            {1}            {2}             {3}            {4}"\
+                .format(self.docNumber, self.city, self.num_of_unique_terms, self.max_tf, self.date_of_publish)
 

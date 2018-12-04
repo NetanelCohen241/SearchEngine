@@ -48,8 +48,11 @@ print("Hello Sugar")
 # print(l.push("f_*"))
 # print(l._data[0][1])
 #
-
-
+# line=linecache.getline("posting0.txt",0)
+#
+# x=Parse.Parser("D:\iretrival\corpus")
+# t,z=x.parse("0000000005555",False)
+# print(t)
 
 if __name__ == '__main__':
 
@@ -64,17 +67,18 @@ if __name__ == '__main__':
 
 
     # starttime = time.time()
-    mod=model.model()
-    mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
+    # mod=model.model()
+    # mod.start_index("D:\iretrival\corpus", "D:\iretrival\posting",False)
     # print(time.time() - starttime)
 
 
-
-    # starttime = time.time()
-    merger=FileMerge.Merger("D:\iretrival\merge",1500)
+    starttime = time.time()
+    merger=FileMerge.Merger("D:\iretrival\posting",2000)
     merger.merge("posting")
+    # merger.upload_dictionary()
     merger.city_index()
-    # print(time.time() - starttime)
+    merger.language_index()
+    print(time.time() - starttime)
 
     # with open("D:\iretrival\merge/dictionary.txt","r") as d:
     #     with open("D:\iretrival\merge/posing1.txt","r") as p:
