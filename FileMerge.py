@@ -50,14 +50,17 @@ class Merger(object):
         self.chunks_list_to_merge = []
         self.pointers = []
         self.files_names = []
-        if not os.path.isfile(self.files_to_merge_path + "/dictionary.txt"):
-            open(self.files_to_merge_path + "/dictionary.txt", "w+")
+        self.file_name=""
+
 
     def merge(self, file_name):
         """
         This function merge the files into one sorted file - posting list
         :return:
         """
+        # if not os.path.isfile(self.files_to_merge_path + "/dictionary.txt"):
+        open(self.files_to_merge_path + "/dictionary"+file_name[7:]+".txt", "w+")
+        self.file_name=file_name
         self.files_names = [word for word in os.listdir(os.getcwd()) if word.startswith(file_name)]
         terms = []
         self.upload_all_files_chunks()
@@ -93,10 +96,10 @@ class Merger(object):
             posting_list_pointer += len(term) + len(merge_content) + 3
 
             if posting_list_pointer > 200000000:
-                self.__write_merge_content_to_disk("posting" + str(posting_id) + ".txt")
+                self.__write_merge_content_to_disk(self.file_name + str(posting_id) + ".txt")
                 posting_id += 1
                 posting_list_pointer=0
-        self.__write_merge_content_to_disk("posting" + str(posting_id) + ".txt")
+        self.__write_merge_content_to_disk(self.file_name + str(posting_id) + ".txt")
 
     def next_term(self, terms):
         """
@@ -240,17 +243,20 @@ class Merger(object):
         return term_corpus_frequency
 
 
-    def upload_dictionary(self):
-        with open(self.files_to_merge_path+"/dictionary.txt","r")as out:
-            lines=out.readlines()
-            for line in lines:
-                l=line.split(":")
-                pos=l[1].split(",")
-                e=DictionaryElement(pos[0])
-                e.pointer=int(pos[1])
-                e.corpus_tf=int(pos[2])
-                self.dictionary[l[0]]=e
-        out.close()
+    def upload_dictionary(self,stem):
+        try:
+            with open(self.files_to_merge_path+"/dictionary"+stem+".txt","r")as out:
+                lines=out.readlines()
+                for line in lines:
+                    l=line.split(":")
+                    pos=l[1].split(",")
+                    e=DictionaryElement(pos[0])
+                    e.pointer=int(pos[1])
+                    e.corpus_tf=int(pos[2])
+                    self.dictionary[l[0]]=e
+            out.close()
+        except:
+            print("task to upload dictionary failed successfully")
         return self.dictionary
 
     def city_index(self):

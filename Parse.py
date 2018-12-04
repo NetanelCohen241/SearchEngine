@@ -31,7 +31,7 @@ class Parser(object):
 
     def parse(self, text, with_stemming):
         """
-
+        This function manage the parsing process.
         :param text: text to parse
         :param with_stemming: whether to do stemming or not
         :return: pair: <docdictionary, max
@@ -42,7 +42,7 @@ class Parser(object):
         if text=="":
             return doc_dictionary,self.max_tf
         self.text = self.clean_txt(text)
-        doc_dictionary = self.parseRules(doc_dictionary)
+        doc_dictionary = self.parse_rules(doc_dictionary)
 
         if with_stemming is True:
             doc_dictionary = self.stem(doc_dictionary)
@@ -219,22 +219,41 @@ class Parser(object):
             i = i + 2
         return i, term
 
-    def stem(self, docDictionary):
+    def stem(self, doc_dictionary):
 
-        tempDict = {}
+        temp_dict = {}
         e=EnglishStemmer()
-        for key in docDictionary.keys():
-            term = e.stem(key)
-            # term = ""
-            if tempDict.__contains__(term):
-                tempDict[term] += docDictionary[key]
+        for key in doc_dictionary.keys():
+            if not self.__hasNumbers(key):
+                term = e.stem(key)
             else:
-                tempDict[term] = docDictionary[key]
+                term= key
+            if temp_dict.__contains__(term):
+                temp_dict[term] += len(doc_dictionary[key])
+            else:
+                temp_dict[term] = len(doc_dictionary[key])
 
-        return tempDict
+        return temp_dict
 
-    def parseRules(self, docDictionary):
+    def __hasNumbers(self, input_string):
+        """
+        This function check whether to given string contains numbers
+        :param input_string:
+        :return: bool
+        """
+        for char in input_string:
+            if char.isdigit():
+                return False
+        return True
 
+    def parse_rules(self, doc_dictionary):
+
+        """
+        This function responsible for parsing the text.
+        It split the text into tokens. itreate over the tokens and activate the parsing rules on each token
+        :param doc_dictionary:
+        :return: Dictionary : Key= term , Value= term frequency in the text
+        """
         i = 0
 
         tokens = self.text.replace("--","").replace("/F","").split(' ')
@@ -295,14 +314,14 @@ class Parser(object):
                             if rangeTokens[0].lower() in size:
                                 # left value in range
                                 j, t = self.calcSize([tokens[i], rangeTokens[0]], 0)
-                                self.addToDictionary(docDictionary,[t],i)
+                                self.add_to_dictionary(doc_dictionary, [t], i)
                                 term = t
                                 acc = acc + 1
                                 if self.isNumber(rangeTokens[1]):
                                     # Number-Number
                                     if i + 2 < len(tokens) and tokens[i + 2].lower() in size:
                                         j, t2 = self.calcSize([rangeTokens[1], tokens[i + 2]], 0)
-                                        self.addToDictionary(docDictionary, [t2],i)
+                                        self.add_to_dictionary(doc_dictionary, [t2], i)
                                         term = term + "-" + t2
                                         i = i + acc + 1
                                     else:
@@ -343,14 +362,14 @@ class Parser(object):
                     elif i + 3 < len(tokens) and tokens[i].lower() == "between" and self.isNumber(tokens[i + 1]) and \
                             tokens[i + 2].lower() == "and" and self.isNumber(tokens[i + 3]):
                         term = "between " + tokens[i + 1] + " and " + tokens[i + 3]
-                        self.addToDictionary(docDictionary, [tokens[i + 1], tokens[i + 3]],i)
+                        self.add_to_dictionary(doc_dictionary, [tokens[i + 1], tokens[i + 3]], i)
                         i = i + 3
                     # range
                     elif '-' in tokens[i]:
                         rangeTokens = tokens[i].split('-')
                         # Word-Word-Word
                         if len(rangeTokens) == 3:
-                            self.addToDictionary(docDictionary, [rangeTokens[0], rangeTokens[1], rangeTokens[2]],i)
+                            self.add_to_dictionary(doc_dictionary, [rangeTokens[0], rangeTokens[1], rangeTokens[2]], i)
                             term = tokens[i]
                         else:
                             t1 = rangeTokens[0]
@@ -375,12 +394,12 @@ class Parser(object):
                                 else:
                                     j, t2 = self.calcSize([rangeTokens[1]], 0)
                             # add to terms list range right value and range left value
-                            self.addToDictionary(docDictionary,[t1, t2],i)
+                            self.add_to_dictionary(doc_dictionary, [t1, t2], i)
                             if term == "":
                                 term = t1 + "-" + t2
                     else:
                         term = tokens[i].replace('_',' ').replace(',', ' ').replace('.', ' ').replace('/', ' ').replace('-',' ').split()
-                        self.addToDictionary(docDictionary, term, i)
+                        self.add_to_dictionary(doc_dictionary, term, i)
                         i+=1
                         continue
 
@@ -388,29 +407,35 @@ class Parser(object):
                 # print(tokens[i])
                 term = tokens[i]
             try:
-                self.addToDictionary(docDictionary, [term],i)
+                self.add_to_dictionary(doc_dictionary, [term], i)
             except:
                 y=5
             i = i + 1
-        return docDictionary
+        return doc_dictionary
 
 
-    def addToDictionary(self, docDictionary, terms, location):
-
+    def add_to_dictionary(self, doc_dictionary, terms, location):
+        """
+        This function adds a term into the dictionary.
+        If the term is already exist in the dictionary, the function append term location to its value in the dictionary
+        :param doc_dictionary: the dictionary to append
+        :param terms: list of few terms to append. most of the times it will be one term
+        :param location:
+        :return:
+        """
 
         for i in range(len(terms)):
             term_data=Term()
-            if docDictionary.__contains__(terms[i]):
-                docDictionary[terms[i]].frq += 1
+            if doc_dictionary.__contains__(terms[i]):
+                doc_dictionary[terms[i]].frq += 1
 
             else:
-                docDictionary[terms[i]] = term_data
-                docDictionary[terms[i]].frq=1
-            if self.max_tf<docDictionary[terms[i]].frq:
-                self.max_tf=docDictionary[terms[i]].frq
-            docDictionary[terms[i]].locations.append(self.location)
+                doc_dictionary[terms[i]] = term_data
+                doc_dictionary[terms[i]].frq=1
+            if self.max_tf<doc_dictionary[terms[i]].frq:
+                self.max_tf=doc_dictionary[terms[i]].frq
+            doc_dictionary[terms[i]].locations.append(self.location)
             self.location+=1
-            # docDictionary[terms[i]].last_loc = docDictionary[terms[i]].locations[-1]
 
 
 
@@ -418,11 +443,15 @@ class Parser(object):
 
 
     def clean_txt(self, text):
+        """
+        This function cleans(replace with space) special characters from the given text
+        :param text:
+        :return: the clean text.
+        """
         to_replace = {':': '', '#': '', '&': '', '"': '', '!': '', '?': '', '*': '', '(': '', ')': '',
                       '[': '', ']': '', '{': '', '}': '', '\n': '', '|': '', '\'': '', '^': '', '@': '',
                       '`': '', '+': '', '<': '', '>': '', ';': '', '=': '' }
 
-        size=len(text)
         ans=""
         for i in text:
             if i not in to_replace:
