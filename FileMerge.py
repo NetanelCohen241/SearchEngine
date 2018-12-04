@@ -51,14 +51,15 @@ class Merger(object):
         self.pointers = []
         self.files_names = []
         self.file_name=""
-        if not os.path.isfile(self.files_to_merge_path + "/dictionary.txt"):
-            open(self.files_to_merge_path + "/dictionary.txt", "w+")
+
 
     def merge(self, file_name):
         """
         This function merge the files into one sorted file - posting list
         :return:
         """
+        # if not os.path.isfile(self.files_to_merge_path + "/dictionary.txt"):
+        open(self.files_to_merge_path + "/dictionary"+file_name[7:]+".txt", "w+")
         self.file_name=file_name
         self.files_names = [word for word in os.listdir(os.getcwd()) if word.startswith(file_name)]
         terms = []

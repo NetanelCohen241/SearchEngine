@@ -64,7 +64,7 @@ class Index(object):
         self.write_city_to_disk(city, pid)
         self.write_docs_to_disk(doc_list)
         self.write_language_to_disk(language)
-        self.write_posting_list_to_disk(posting_list, pid)
+        self.write_posting_list_to_disk(posting_list, pid, with_stemming)
 
 
     def insert_to_posting_list(self, posting_list, doc_dictionary, doc):
@@ -109,20 +109,24 @@ class Index(object):
         my_city[doc_city.upper()] = city_obj
 
 
-    def write_posting_list_to_disk(self, postingList, pid):
+    def write_posting_list_to_disk(self, posting_list, pid, with_stemming):
         """
         This function sorts the posting list and writes it into the disk.
-        :param postingList: given posting list
+        :param posting_list: given posting list
         :param pid:
         :return:
         """
-        with open("posting" + str(pid) + ".txt", "w+", -1, "utf-8") as out:
+        if with_stemming:
+            name="postingWithStemming" + str(pid) + ".txt"
+        else:
+            name = "posting" + str(pid) + ".txt"
+        with open(name, "w+", -1, "utf-8") as out:
 
-            for key in sorted(postingList.keys(), key=str.lower):
+            for key in sorted(posting_list.keys(), key=str.lower):
                 if key == "":
                     continue
                 out.write(key+ ":")
-                for element in postingList[key]:
+                for element in posting_list[key]:
                     out.write(element.to_string() + " ")
                 out.write("\n")
         out.close()
