@@ -290,7 +290,7 @@ class Merger(object):
         language={}
         while line!="":
             line=linecache.getline("language.txt",i).split()
-            if len(line)==0 or Parser.isNumber(line):
+            if len(line)==0 or line[0].isdigit():
                 break
             line=line[0].replace(',','').lower()
             if not language.__contains__(line):

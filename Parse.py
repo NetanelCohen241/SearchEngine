@@ -24,7 +24,7 @@ class Parser(object):
     def __init__(self, stop_words):
 
         self.stop_words = stop_words
-        self.trm = []
+        self.stem_dict = {}
         self.text=""
         self.max_tf=0
         self.location=0
