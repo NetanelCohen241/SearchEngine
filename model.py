@@ -8,6 +8,7 @@ import os
 import time
 
 import FileMerge
+from FileMerge import DictionaryElement
 import Indexer
 
 class IndexElement(object):
@@ -52,15 +53,19 @@ class model(object):
             os.remove(path + "/" + str(file))
         self.term_dictionary.clear()
 
-    def read_dictionary_from_file(self, path,stem_flag):
+    def read_dictionary_from_file(self,stem_flag):
         file_name= "/dictionary.txt" if not stem_flag else "/dictionaryWithStemming.txt"
-        with open(path + file_name, "r") as f:
+        with open(self.posting_and_dictionary_path + file_name, "r") as f:
             txt = f.readlines()
             for line in txt:
-                line = line.replace("\n", "")
-                tmp = line.split(":")
-                data = tmp[1].split(",")
-                self.term_dictionary[tmp[0]] = data
+                l = line.split(":")
+                pos = l[1].split(",")
+                e = DictionaryElement(pos[0])
+                e.pointer = int(pos[1])
+                e.corpus_tf = int(pos[2])
+                self.term_dictionary[l[0]] = e
+        f.close()
+
 
     def fill_cites(self):
         response = requests.get("https://restcountries.eu/rest/v2/all")
@@ -79,23 +84,23 @@ class model(object):
         idx = Indexer.Index(index_element.corpus_path, index_element.posting_path, self.cities_from_api, index_element.stop_words)
         idx.create_index(index_element.stem, index_element.id, index_element.block_size)
 
-    def start_index(self, corpus_path, posting_path, stem):
+    def start_index(self, stem):
         stop_words = {}
-        with open(corpus_path + "/stop_words.txt", "r") as sw:
+        with open(self.corpus_path + "/stop_words.txt", "r") as sw:
             lines = sw.readlines()
             for line in lines:
                 stop_words[line[:len(line) - 1]] = ""
             sw.close()
-        files_number = len([word for word in os.listdir(corpus_path) if os.path.isdir(corpus_path + "/" + word)])
-        s = files_number / 40
+        files_number = len([word for word in os.listdir(self.corpus_path) if os.path.isdir(self.corpus_path + "/" + word)])
+        s = files_number / 100
         tasks = []
         i = 0
         while i < int(s):
-            index_element = IndexElement(i, corpus_path, posting_path, stem, 40, stop_words)
+            index_element = IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, 100, stop_words)
             tasks.append(index_element)
             i += 1
-        if files_number % 40 > 0:
-            tasks.append(IndexElement(i, corpus_path, posting_path, stem, files_number % 40, stop_words))
+        if files_number % 100 > 0:
+            tasks.append(IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, files_number % 100, stop_words))
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()))
         pool.map(self.index, tasks)

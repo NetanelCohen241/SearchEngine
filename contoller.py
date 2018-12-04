@@ -24,25 +24,24 @@ class controller(object):
         dictionary= self.model.get_dictionary()
         dic = {"term": [], "term-freq": []}
         for key in dictionary.keys():
-            key_value = key
             dic["term"].append(key)
-            y = int(",".join(dictionary[key]).replace("\n", "").split(",")[-1])
+            y = dictionary[key].corpus_tf
             dic["term-freq"].append(y)
         index=["#"]*len(dic["term-freq"])
-        data = {'         Term': list(dic["term"]), "         Term-frequency": list(dic["term-freq"])}
+        data = {'Term': list(dic["term"]), "Term-frequency": list(dic["term-freq"])}
         df = pd.DataFrame(data=data,index=index)
-        df = df.sort_values("         Term-frequency", 0, False)
+        df = df.sort_values("Term-frequency", 0, False)
         return df.to_string()
 
-    def start_indexing(self,corpusPath,postingPath,stem_flag):
+    def start_indexing(self,stem_flag):
         """
         this function start the indexing
         :param corpusPath: location of the courpos
         :param postingPath: location of posting files
         :return:
         """
-        print("start indexing...\nCourpus Path: {0}\nPosting Path: {1}\nStemmer: {2}".format(corpusPath,postingPath,stem_flag))
-        self.model.start_index(corpusPath,postingPath,stem_flag)
+        print("start indexing...\nCourpus Path: {0}\nPosting Path: {1}\nStemmer: {2}".format(self.model.corpus_path, self.model.posting_and_dictionary_path,stem_flag))
+        self.model.start_index(stem_flag)
         pass
 
     def set_corpus_path(self,path):
@@ -61,11 +60,11 @@ class controller(object):
         """
         self.model.set_posting_and_dictionary_path(path)
 
-    def load_dictionary(self,path):
+    def load_dictionary(self,stem):
         """
         reade dictionary to the RAM using the given path
         :param path: the path of the directory that contain dictionary.txt
         :return:
         """
-        return self.model.read_dictionary_from_file(path)
+        self.model.read_dictionary_from_file(stem)
 

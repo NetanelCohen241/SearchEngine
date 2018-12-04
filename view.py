@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter import messagebox
 
+import time
 
 from model import model
 import contoller
@@ -102,9 +103,8 @@ class view(object):
 
     def load_dictionary(self, event):
         try:
-            self.control.load_dictionary(self.posting_path,self.stemFlag.get()!=0)
-            messagebox.showinfo("Load successful",
-                                 "Dictionary was loaded to the RAM")
+            self.control.load_dictionary(self.stemFlag.get()!=0)
+            messagebox.showinfo("Load successful","Dictionary was loaded to the RAM")
             self.dic_in_RAM=True
         except:
             if self.stemFlag==0:
@@ -120,7 +120,9 @@ class view(object):
             messagebox.showerror("input Error","sorry, You need to Select the following information:\ncourpus path, posting path")
             return
         messagebox.showinfo("Information","this action can take a while Please wait")
-        # self.control.start_indexing(self.corpus_path,self.posting_path,stemmer)
+        start_time=time.time()
+        self.control.start_indexing(stemmer)
+        index_time=time.time()-start_time
         with open(self.posting_path + "/languages.txt") as f:
             choices = {'All'}
             for i in f.readlines():
@@ -128,12 +130,26 @@ class view(object):
             choices=sorted(choices)
             self.popupMenu = OptionMenu(self.master, self.lang_chosse, *choices)
             self.popupMenu.grid(row=2, column=1, sticky=W)
+        f.close()
+        num_of_docs = 0
+        with open(self.posting_path + "/docs.txt") as f:
+            num_of_docs = len(f.readlines())
+        f.close()
+        with open(self.posting_path + "/dictionary.txt" if self.stemFlag !=0 else "/dictionaryWithStemming.txt") as f:
+            num_of_terms = len(f.readlines())
+        f.close()
+        messagebox.showinfo("Indexing finished", "{0} documents indexed\n{1} uniqe term were created\nTotal time in sec: {2}"
+                             .format(num_of_docs, num_of_terms, int(index_time)))
+
+
+
+
 
 
 def main():
     root = Tk()
     root.title("Search Engine")
-    root.geometry("1000x250")
+    root.geometry("1000x450")
     root.resizable(0,0)
     Model = model()
     Control = contoller.controller( Model )
