@@ -7,6 +7,7 @@ from multiprocessing import Pool
 import os
 import time
 
+import FileMerge
 import Indexer
 
 class IndexElement(object):
@@ -98,6 +99,20 @@ class model(object):
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()))
         pool.map(self.index, tasks)
+        print(time.time() - starttime)
+        self.start_merge(stem)
+
+    def start_merge(self, stem):
+
+        starttime = time.time()
+        merger = FileMerge.Merger(self.posting_and_dictionary_path, 2000)
+        file_name="posting"
+        if stem:
+            file_name+="WithStemming"
+        merger.merge(file_name)
+        # merger.upload_dictionary()
+        merger.city_index()
+        merger.language_index()
         print(time.time() - starttime)
 
 

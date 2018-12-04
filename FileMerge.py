@@ -243,17 +243,20 @@ class Merger(object):
         return term_corpus_frequency
 
 
-    def upload_dictionary(self):
-        with open(self.files_to_merge_path+"/dictionary.txt","r")as out:
-            lines=out.readlines()
-            for line in lines:
-                l=line.split(":")
-                pos=l[1].split(",")
-                e=DictionaryElement(pos[0])
-                e.pointer=int(pos[1])
-                e.corpus_tf=int(pos[2])
-                self.dictionary[l[0]]=e
-        out.close()
+    def upload_dictionary(self,stem):
+        try:
+            with open(self.files_to_merge_path+"/dictionary"+stem+".txt","r")as out:
+                lines=out.readlines()
+                for line in lines:
+                    l=line.split(":")
+                    pos=l[1].split(",")
+                    e=DictionaryElement(pos[0])
+                    e.pointer=int(pos[1])
+                    e.corpus_tf=int(pos[2])
+                    self.dictionary[l[0]]=e
+            out.close()
+        except:
+            print("task to upload dictionary failed successfully")
         return self.dictionary
 
     def city_index(self):
