@@ -51,8 +51,9 @@ class model(object):
             os.remove(path + "/" + str(file))
         self.term_dictionary.clear()
 
-    def read_dictionary_from_file(self, path):
-        with open(path + "/dictionary.txt", "r") as f:
+    def read_dictionary_from_file(self, path,stem_flag):
+        file_name= "/dictionary.txt" if not stem_flag else "/dictionaryWithStemming.txt"
+        with open(path + file_name, "r") as f:
             txt = f.readlines()
             for line in txt:
                 line = line.replace("\n", "")
@@ -78,7 +79,6 @@ class model(object):
         idx.create_index(index_element.stem, index_element.id, index_element.block_size)
 
     def start_index(self, corpus_path, posting_path, stem):
-
         stop_words = {}
         with open(corpus_path + "/stop_words.txt", "r") as sw:
             lines = sw.readlines()

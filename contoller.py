@@ -1,5 +1,6 @@
 from tkinter import filedialog, END
 from  model import model
+import pandas as pd
 
 
 class controller(object):
@@ -20,7 +21,18 @@ class controller(object):
         :param path: path of the location of the ductionary
         :return:
         """
-        return self.model.get_dictionary()
+        dictionary= self.model.get_dictionary()
+        dic = {"term": [], "term-freq": []}
+        for key in dictionary.keys():
+            key_value = key
+            dic["term"].append(key)
+            y = int(",".join(dictionary[key]).replace("\n", "").split(",")[-1])
+            dic["term-freq"].append(y)
+        index=["#"]*len(dic["term-freq"])
+        data = {'         Term': list(dic["term"]), "         Term-frequency": list(dic["term-freq"])}
+        df = pd.DataFrame(data=data,index=index)
+        df = df.sort_values("         Term-frequency", 0, False)
+        return df.to_string()
 
     def start_indexing(self,corpusPath,postingPath,stem_flag):
         """
@@ -49,11 +61,11 @@ class controller(object):
         """
         self.model.set_posting_and_dictionary_path(path)
 
-    def load_dictionary(self,path):
+    def load_dictionary(self,path,stem_flag):
         """
         reade dictionary to the RAM using the given path
         :param path: the path of the directory that contain dictionary.txt
         :return:
         """
-        return self.model.read_dictionary_from_file(path)
+        return self.model.read_dictionary_from_file(path,stem_flag)
 
