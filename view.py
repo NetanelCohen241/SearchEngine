@@ -103,6 +103,7 @@ class view(object):
             messagebox.showerror("Error","you must enter the posting and dictionary path before reset")
             return
         self.control.delete_files(self.posting_path)
+        messagebox.showinfo("reset","all file from {0} deleted".format(self.posting_path))
 
 
     def display_dict(self, event):
@@ -162,7 +163,11 @@ class view(object):
             return
         messagebox.showinfo("Information","this action can take a while Please wait")
         start_time=time.time()
-        self.control.start_indexing(stemmer)
+        try:
+            self.control.start_indexing(stemmer)
+        except Exception as e:
+            messagebox.showerror("Error",repr(e))
+            return
         index_time=time.time()-start_time
         with open(self.posting_path + "/languages.txt") as f:
             choices = {'All'}

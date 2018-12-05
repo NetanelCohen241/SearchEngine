@@ -19,7 +19,7 @@ class IndexElement(object):
         self.posting_path = posting_path
         self.stem = stem
         self.block_size = block_size
-        self.stop_words=stop_words
+        self.stop_words = stop_words
 
 
 class model(object):
@@ -32,8 +32,8 @@ class model(object):
         self.cities_from_api = {}
         self.fill_cites()
         self.data = 5
-        self.corpus_path=""
-        self.posting_and_dictionary_path=""
+        self.corpus_path = ""
+        self.posting_and_dictionary_path = ""
         with open("language.txt", "w+") as fout:
             pass
         fout.close()
@@ -65,13 +65,13 @@ class model(object):
             os.remove(path + "/" + str(file))
         self.term_dictionary.clear()
 
-    def read_dictionary_from_file(self,stem_flag):
+    def read_dictionary_from_file(self, stem_flag):
         """
         reade  from a txt  file nd bulding the term dictionary
         :param stem_flag: indicate if to reade stemmed dictionary or not
         :return:
         """
-        file_name= "/dictionary.txt" if not stem_flag else "/dictionaryWithStemming.txt"
+        file_name = "/dictionary.txt" if not stem_flag else "/dictionaryWithStemming.txt"
         with open(self.posting_and_dictionary_path + file_name, "r") as f:
             txt = f.readlines()
             for line in txt:
@@ -82,7 +82,6 @@ class model(object):
                 e.corpus_tf = int(pos[2])
                 self.term_dictionary[l[0]] = e
         f.close()
-
 
     def fill_cites(self):
         """
@@ -115,16 +114,21 @@ class model(object):
         :param stem:
         :return:
         """
-        with open(self.posting_and_dictionary_path + "/docsStem.txt" if stem else self.posting_and_dictionary_path + "/docs.txt", "w+") as out:
-            out.write("Number            City            CityLocations             NumOfUniqueTerms    maxTf\n")
+        with open(self.posting_and_dictionary_path + "/docsStem" if stem else self.posting_and_dictionary_path + "/docs.txt", "w+") as out:
+            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
 
         stop_words = {}
-        with open(self.corpus_path + "/stop_words.txt", "r") as sw:
-            lines = sw.readlines()
-            for line in lines:
-                stop_words[line[:len(line) - 1]] = ""
+        try:
+            with open(self.corpus_path + "/stop_words.txt", "r") as sw:
+                lines = sw.readlines()
+                for line in lines:
+                    stop_words[line[:len(line) - 1]] = ""
             sw.close()
+
+        except Exception:
+            raise FileNotFoundError("the file stop_words.txt didn't found")
+
         files_number = len([word for word in os.listdir(self.corpus_path) if os.path.isdir(self.corpus_path + "/" + word)])
         s = files_number / 46
         tasks = []
@@ -149,9 +153,9 @@ class model(object):
         """
         starttime = time.time()
         merger = FileMerge.Merger(self.posting_and_dictionary_path, 1000)
-        file_name="posting"
+        file_name = "posting"
         if stem:
-            file_name+="WithStemming"
+            file_name += "WithStemming"
         merger.merge(file_name)
         # merger.uploaddd_dictionary()
         merger.city_index()
