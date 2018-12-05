@@ -135,7 +135,7 @@ class view(object):
         with open(self.posting_path + "/docs.txt") as f:
             num_of_docs = len(f.readlines())
         f.close()
-        with open(self.posting_path + "/dictionary.txt" if self.stemFlag !=0 else "/dictionaryWithStemming.txt") as f:
+        with open(self.posting_path + "/dictionary.txt" if not stemmer else self.posting_path + "/dictionaryWithStemming.txt") as f:
             num_of_terms = len(f.readlines())
         f.close()
         messagebox.showinfo("Indexing finished", "{0} documents indexed\n{1} uniqe term were created\nTotal time in sec: {2}"

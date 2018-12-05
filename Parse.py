@@ -3,32 +3,31 @@ import re
 from nltk.stem.snowball import EnglishStemmer
 
 months = ["january", "jan", "february", "feb", "march", "mar", "april", "apr", "may", "may", "june", "jun", "july",
-          "jul","august", "aug", "september", "sep", "october", "oct", "november", "nov", "december", "dec"]
+          "jul", "august", "aug", "september", "sep", "october", "oct", "november", "nov", "december", "dec"]
 
 size = ["trillion", "billion", "million", "thousand"]
+
 
 class Term:
     def __init__(self):
         # self.frq=0
-        self.locations=[]
+        self.locations = []
 
     def to_string(self):
-        ans="["+str(self.locations[0])
-        for i in range(1,len(self.locations)):
-            ans+=","+str(self.locations[i])
-        return ans+"]"
+        ans = "[" + str(self.locations[0])
+        for i in range(1, len(self.locations)):
+            ans += "," + str(self.locations[i])
+        return ans + "]"
 
 
 class Parser(object):
-
     def __init__(self, stop_words):
 
         self.stop_words = stop_words
         self.stem_dict = {}
-        self.text=""
-        self.max_tf=0
-        self.location=0
-
+        self.text = ""
+        self.max_tf = 0
+        self.location = 0
 
     def parse(self, text, with_stemming):
         """
@@ -38,16 +37,16 @@ class Parser(object):
         :return: pair: <docdictionary, max
         """
         self.location = 0
-        self.max_tf=0
+        self.max_tf = 0
         doc_dictionary = {}
-        if text=="":
-            return doc_dictionary,self.max_tf
+        if text == "":
+            return doc_dictionary, self.max_tf
         self.text = self.clean_txt(text)
         doc_dictionary = self.parse_rules(doc_dictionary)
 
         if with_stemming:
             doc_dictionary = self.stem(doc_dictionary)
-        return doc_dictionary,self.max_tf
+        return doc_dictionary, self.max_tf
 
     def str_to_number(self, num):
         """
@@ -59,16 +58,15 @@ class Parser(object):
 
     def clear_zeros(self, num):
         i = 0
-        size=len(num)
-        for idx in range(0,size):
-            if num[idx] == '0' and idx+1 < size and num[idx+1] != ".":
+        size = len(num)
+        for idx in range(0, size):
+            if num[idx] == '0' and idx + 1 < size and num[idx + 1] != ".":
                 i = i + 1
             else:
                 break
-        if i== size:
+        if i == size:
             return "0"
         return num[i:]
-
 
     def calcSize(self, tokens, i):
         """
@@ -80,7 +78,7 @@ class Parser(object):
         and return the last index the function work on
         """
         # print(tokens[i])
-        tokens[i]=self.clear_zeros(tokens[i])
+        tokens[i] = self.clear_zeros(tokens[i])
         term = ""
         fraction = ""
         if self.isFraction(tokens[i]):
@@ -165,7 +163,6 @@ class Parser(object):
         # 1st- regular expression that detect number like X,YYY  or X,YYY.ZZ
         return re.match("^(\d+|\d{1,3}(,\d{3})*)(\.\d+)?$", token) or self.isFraction(token)
 
-
     # return price term according price term rules
     # change to push
     def calcPrice(self, tokens, i, flag):
@@ -220,17 +217,17 @@ class Parser(object):
     def stem(self, doc_dictionary):
 
         temp_dict = {}
-        e=EnglishStemmer()
+        e = EnglishStemmer()
         for key in doc_dictionary.keys():
             if not self.__hasNumbers(key):
                 term = e.stem(key)
             else:
-                term= key
+                term = key
             if temp_dict.__contains__(term):
                 temp_dict[term].locations.extend(doc_dictionary[key].locations)
             else:
-                t=Term()
-                t.locations=doc_dictionary[key].locations
+                t = Term()
+                t.locations = doc_dictionary[key].locations
                 temp_dict[term] = t
 
         return temp_dict
@@ -243,8 +240,8 @@ class Parser(object):
         """
         for char in input_string:
             if char.isdigit():
-                return False
-        return True
+                return True
+        return False
 
     def parse_rules(self, doc_dictionary):
 
@@ -256,10 +253,10 @@ class Parser(object):
         """
         i = 0
 
-        tokens = self.text.replace("--","").replace("/F","").split(' ')
+        tokens = self.text.replace("--", "").replace("/F", "").split(' ')
 
         while i < len(tokens):
-            term=""
+            term = ""
             try:
                 if tokens[i].lower() in self.stop_words or tokens[i] in ['-', "--", ',', '.', ''] or tokens[i] == "/F":
                     i = i + 1
@@ -293,8 +290,8 @@ class Parser(object):
                 elif self.isNumber(tokens[i]):
                     # Percent
                     if i + 1 < len(tokens) and (
-                            tokens[i + 1].lower().replace(',', '').replace('.', '') == "percent" or
-                            tokens[i + 1].lower().replace(',', '').replace('.', '') == "percentage"):
+                                    tokens[i + 1].lower().replace(',', '').replace('.', '') == "percent" or
+                                    tokens[i + 1].lower().replace(',', '').replace('.', '') == "percentage"):
                         i, term = self.calcSize(tokens, i)
                         term += '%'
                         i = i + 1
@@ -302,8 +299,9 @@ class Parser(object):
                     elif (i + 1 < len(tokens) and tokens[i + 1].lower().replace(',', '').replace('.',
                                                                                                  '') == "dollars") or \
                             (i + 2 < len(tokens) and (
-                                    tokens[i + 2].lower().replace(',', '').replace('.', '') == "dollars" or tokens[
-                                i + 2] == "U.S.")):
+                                            tokens[i + 2].lower().replace(',', '').replace('.', '') == "dollars" or
+                                            tokens[
+                                                    i + 2] == "U.S.")):
                         i, term = self.calcPrice(tokens, i, False)
                     # Number(only size)
                     else:
@@ -360,7 +358,7 @@ class Parser(object):
                             term = tokens[i]
                     # check if its range pattern: "between Number and Number"
                     elif i + 3 < len(tokens) and tokens[i].lower() == "between" and self.isNumber(tokens[i + 1]) and \
-                            tokens[i + 2].lower() == "and" and self.isNumber(tokens[i + 3]):
+                                    tokens[i + 2].lower() == "and" and self.isNumber(tokens[i + 3]):
                         term = "between " + tokens[i + 1] + " and " + tokens[i + 3]
                         self.add_to_dictionary(doc_dictionary, [tokens[i + 1], tokens[i + 3]], i)
                         i = i + 3
@@ -376,7 +374,7 @@ class Parser(object):
                             t2 = rangeTokens[1]
                             if self.isNumber(rangeTokens[0]):
                                 # Number -
-                                if tokens[i+1]=="GMT":
+                                if tokens[i + 1] == "GMT":
                                     t1 = rangeTokens[0][:2] + "_" + rangeTokens[0][2:]
                                 else:
                                     j, t1 = self.calcSize(rangeTokens, 0)
@@ -384,7 +382,7 @@ class Parser(object):
                                     term = rangeTokens[0] + "%"
                             if self.isNumber(rangeTokens[1]):
                                 # - Number
-                                if tokens[i+1]=="GMT":
+                                if tokens[i + 1] == "GMT":
                                     t2 = rangeTokens[1][:2] + "_" + rangeTokens[1][2:]
                                     if i + 1 < len(tokens) and tokens[i + 1].replace(",", '') == "GMT":
                                         i = i + 1
@@ -398,9 +396,11 @@ class Parser(object):
                             if term == "":
                                 term = t1 + "-" + t2
                     else:
-                        term = tokens[i].replace('_',' ').replace(',', ' ').replace('.', ' ').replace('/', ' ').replace('-',' ').split()
+                        term = tokens[i].replace('_', ' ').replace(',', ' ').replace('.', ' ').replace('/',
+                                                                                                       ' ').replace('-',
+                                                                                                                    ' ').split()
                         self.add_to_dictionary(doc_dictionary, term, i)
-                        i+=1
+                        i += 1
                         continue
 
             except:
@@ -409,10 +409,9 @@ class Parser(object):
             try:
                 self.add_to_dictionary(doc_dictionary, [term], i)
             except:
-                y=5
+                y = 5
             i = i + 1
         return doc_dictionary
-
 
     def add_to_dictionary(self, doc_dictionary, terms, location):
         """
@@ -425,22 +424,17 @@ class Parser(object):
         """
 
         for i in range(len(terms)):
-            term_data=Term()
+            term_data = Term()
             if doc_dictionary.__contains__(terms[i]):
                 doc_dictionary[terms[i]].frq += 1
 
             else:
                 doc_dictionary[terms[i]] = term_data
-                doc_dictionary[terms[i]].frq=1
-            if self.max_tf<doc_dictionary[terms[i]].frq:
-                self.max_tf=doc_dictionary[terms[i]].frq
+                doc_dictionary[terms[i]].frq = 1
+            if self.max_tf < doc_dictionary[terms[i]].frq:
+                self.max_tf = doc_dictionary[terms[i]].frq
             doc_dictionary[terms[i]].locations.append(self.location)
-            self.location+=1
-
-
-
-
-
+            self.location += 1
 
     def clean_txt(self, text):
         """
@@ -450,9 +444,9 @@ class Parser(object):
         """
         to_replace = {':': '', '#': '', '&': '', '"': '', '!': '', '?': '', '*': '', '(': '', ')': '',
                       '[': '', ']': '', '{': '', '}': '', '\n': '', '|': '', '\'': '', '^': '', '@': '',
-                      '`': '', '+': '', '<': '', '>': '', ';': '', '=': '' }
+                      '`': '', '+': '', '<': '', '>': '', ';': '', '=': ''}
 
-        ans=""
+        ans = ""
         for i in text:
             if i not in to_replace:
                 ans += i

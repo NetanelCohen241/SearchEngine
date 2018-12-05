@@ -22,7 +22,10 @@ import Reader
 
 import model
 print("Hello Sugar")
+from nltk.stem.snowball import EnglishStemmer
 
+e= EnglishStemmer()
+print("Stem" in "postingWithStemming")
 
 if __name__ == '__main__':
     # num_of_None_capital=0
@@ -33,7 +36,7 @@ if __name__ == '__main__':
     #        if line.split()[3] == "0":
     #            num_of_None_capital += 1
     #        total += 1
-    #
+    # model.model
     # print("number of None capital city: {0}\nTotal cities: {1}".format(num_of_None_capital,total))
     # stop_words = {}
     # with open("D:\iretrival\corpus" + "/stop_words.txt", "r") as sw:
