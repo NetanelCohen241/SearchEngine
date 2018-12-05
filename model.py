@@ -115,7 +115,7 @@ class model(object):
         :param stem:
         :return:
         """
-        with open(self.posting_and_dictionary_path + "/docs"+"Stem" if stem else ""+".txt", "w+") as out:
+        with open(self.posting_and_dictionary_path + "/docsStem" if stem else self.posting_and_dictionary_path + "/docs.txt", "w+") as out:
             out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
 
@@ -148,7 +148,7 @@ class model(object):
         :return:
         """
         starttime = time.time()
-        merger = FileMerge.Merger(self.posting_and_dictionary_path, 5000)
+        merger = FileMerge.Merger(self.posting_and_dictionary_path, 1000)
         file_name="posting"
         if stem:
             file_name+="WithStemming"

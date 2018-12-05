@@ -173,7 +173,7 @@ class view(object):
             self.popupMenu.grid(row=2, column=1, sticky=W)
         f.close()
         num_of_docs = 0
-        with open(self.posting_path + "/docs.txt") as f:
+        with open(self.posting_path + "/docs.txt" if not stemmer else self.posting_path + "/docsStem.txt") as f:
             num_of_docs = len(f.readlines())
         f.close()
         with open(self.posting_path + "/dictionary.txt" if not stemmer else self.posting_path + "/dictionaryWithStemming.txt") as f:
