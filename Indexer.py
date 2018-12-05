@@ -62,7 +62,7 @@ class Index(object):
             self.insert_to_posting_list(posting_list, doc_dictionary, doc)
             self.insert_to_city(city,doc)
         self.write_city_to_disk(city, pid)
-        self.write_docs_to_disk(doc_list)
+        self.write_docs_to_disk(doc_list,with_stemming)
         self.write_language_to_disk(language)
         self.write_posting_list_to_disk(posting_list, pid, with_stemming)
 
@@ -133,13 +133,13 @@ class Index(object):
         out.close()
 
 
-    def write_docs_to_disk(self, doc_list):
+    def write_docs_to_disk(self, doc_list, stem):
         """
         This function writes the given doc list to disk- doc number , num of uniqe terms,
         :param doc_list:
         :return:
         """
-        with open(self.postingListPath +'/' +"docs.txt", "a+") as out:
+        with open(self.postingListPath +"/docs"+"Stem" if stem else ""+".txt", "a+") as out:
             for doc in doc_list:
                 out.write(doc.to_string() + "\n")
         out.close()
