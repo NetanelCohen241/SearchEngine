@@ -229,7 +229,7 @@ class Merger(object):
         try:
             elements = line.split()
             for i in range(len(elements)):
-                term_corpus_frequency += len(elements[i].split('[')[1].split(','))
+                term_corpus_frequency += len(elements[i].split('[')[1].split(']')[0].split(','))
         except:
             return 0
         return term_corpus_frequency
