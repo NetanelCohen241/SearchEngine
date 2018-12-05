@@ -139,7 +139,7 @@ class Index(object):
         :param doc_list:
         :return:
         """
-        with open(self.postingListPath +"/docsStem" if stem else self.postingListPath +"/docs", "a+") as out:
+        with open(self.postingListPath +"/docsStem.txt" if stem else self.postingListPath +"/docs.txt", "a+") as out:
             for doc in doc_list:
                 out.write(doc.to_string() + "\n")
         out.close()

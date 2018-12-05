@@ -103,7 +103,7 @@ class view(object):
             messagebox.showerror("Error","you must enter the posting and dictionary path before reset")
             return
         self.control.delete_files(self.posting_path)
-        messagebox.showinfo("reset","all file from {0} deleted".format(self.posting_path))
+        messagebox.showinfo("reset","All files from {0} were deleted".format(self.posting_path))
 
 
     def display_dict(self, event):
