@@ -166,7 +166,6 @@ class Parser(object):
     # return price term according price term rules
     # change to push
     def calcPrice(self, tokens, i, flag):
-
         tokens[i] = self.clear_zeros(tokens[i])
         term = ""
         fraction = " "
