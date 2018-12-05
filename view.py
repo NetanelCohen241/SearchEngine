@@ -61,6 +61,13 @@ class view(object):
         # self.entry.bind("<Button-3>", self.enter_handler)
 
     def clik_on_browse_corpus(self, event):
+        """
+        אlistener for the browse corpus path button
+        set the courpus path in the controller
+        and show it to the user
+        :param event:
+        :return:
+        """
         try:
             self.corpus_path = filedialog.askdirectory()
             self.control.set_corpus_path(self.corpus_path)
@@ -70,6 +77,13 @@ class view(object):
             pass
 
     def clik_on_browse_posting_and_dict(self, event):
+        """
+            אlistener for the browse post and dictionary path button
+            set the posting path and dictionary path in the controller
+            and show it to the user
+            :param event:
+            :return:
+            """
         try:
             self.posting_path = filedialog.askdirectory()
             self.control.set_posting_path(self.posting_path)
@@ -80,6 +94,11 @@ class view(object):
 
 
     def clik_on_reset(self, event):
+        """
+        listener for the reset button
+        :param event:
+        :return:
+        """
         if self.posting_path == "":
             messagebox.showerror("Error","you must enter the posting and dictionary path before reset")
             return
@@ -87,6 +106,11 @@ class view(object):
 
 
     def display_dict(self, event):
+        """
+        listener for the show dictionary path
+        :param event:
+        :return:
+        """
         if not self.dic_in_RAM:
             messagebox.showerror("Error",
                                  "sorry, You must load the dictionary before you click 'show dictionary' button")
@@ -105,6 +129,11 @@ class view(object):
         text.insert(END,to_display)
 
     def load_dictionary(self, event):
+        """
+        listener for the Load Dictionary button
+        :param event:
+        :return:
+        """
         if self.posting_path == "":
             messagebox.showerror("Error", "you must enter the posting and dictionary path before Loadind dictionary")
             return
@@ -121,6 +150,12 @@ class view(object):
                                      "there is no dictionaryWithStemming.txt file in the posting path")
 
     def clik_on_start(self,event):
+        """
+        listener for the start indexing button
+        start the indexing process
+        :param event:
+        :return:
+        """
         stemmer = self.stemFlag.get()!=0
         if self.corpus_path=="" or self.posting_path=="":
             messagebox.showerror("input Error","sorry, You need to Select the following information:\ncourpus path, posting path")
