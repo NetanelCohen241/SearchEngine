@@ -4,6 +4,7 @@ from tkinter import messagebox
 
 import time
 
+import Parse
 from model import model
 import contoller
 
@@ -20,7 +21,7 @@ class view(object):
         self.posting_path=""
         self.dic_in_RAM=False
         self.lang_chosse=StringVar(master)
-        choices = {'start indexing to see languades'}
+        choices = {'start indexing to see languages'}
         self.popupMenu =  OptionMenu(self.master,choices,*choices)
         Label(master, text="Choose a Language:").grid(row=2, column=0,sticky=E)
 
@@ -28,13 +29,13 @@ class view(object):
         #widdgets on the gui
         self.entry_corpus = Text(self.master, height=2, width=100)
         self.entry_posting_and_dict = Text(self.master, height=2, width=100)
-        self.b_browse_corpus=Button(self.master,compound=LEFT, text="browse corpus path")
+        self.b_browse_corpus=Button(self.master,compound=LEFT, text="Browse corpus path")
         self.b_browse_posting_and_dict=Button(self.master,compound=LEFT, text="Browse posting and dictionary path")
         self.b_reset=Button(self.master, text="Reset")
-        self.b_dict=Button(self.master,compound=LEFT, text="Dictionary Show")
-        self.b_load_dictionary=Button(self.master,compound=LEFT, text="Dictionary load")
+        self.b_dict=Button(self.master,compound=LEFT, text="Show Dictionary")
+        self.b_load_dictionary=Button(self.master,compound=LEFT, text="Load Dictionary")
         self.b_start=Button(self.master, text="Start Indexing")
-        self.stemCheck=Checkbutton(self.master,text="Stemminig?",variable=self.stemFlag)
+        self.stemCheck=Checkbutton(self.master,text="Stemming?",variable=self.stemFlag)
 
         self.entry_corpus.grid(row=0, column=0)
         self.b_browse_corpus.grid(row=0, column=1,sticky=N+S+E+W)
@@ -57,7 +58,6 @@ class view(object):
         self.b_dict.bind("<1>", self.display_dict)
         self.b_start.bind("<1>", self.clik_on_start)
         self.b_load_dictionary.bind("<1>",self.load_dictionary)
-
         # self.entry.bind("<Button-3>", self.enter_handler)
 
     def clik_on_browse_corpus(self, event):
@@ -90,7 +90,7 @@ class view(object):
             return
 
         dict_window=Toplevel(self.master)
-        dict_window.title("dictionary information")
+        dict_window.title("Dictionary information")
         dict_window.geometry("600x600")
         text=Text(dict_window, height=600, width=600)
         S = Scrollbar(dict_window)
@@ -138,7 +138,7 @@ class view(object):
         with open(self.posting_path + "/dictionary.txt" if self.stemFlag !=0 else "/dictionaryWithStemming.txt") as f:
             num_of_terms = len(f.readlines())
         f.close()
-        messagebox.showinfo("Indexing finished", "{0} documents indexed\n{1} uniqe term were created\nTotal time in sec: {2}"
+        messagebox.showinfo("Indexing finished", "{0} documents were indexed\n{1} uniqe term were created\nTotal time in sec: {2}"
                              .format(num_of_docs, num_of_terms, int(index_time)))
 
 
