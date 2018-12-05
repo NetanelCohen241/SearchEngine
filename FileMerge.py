@@ -65,7 +65,7 @@ class Merger(object):
 
         self.start_merge(terms)
         self.write_dictionary_to_disk(file_name)
-        # self.__remove_tmp_files(file_name)
+        self.__remove_tmp_files(file_name)
 
     def start_merge(self, terms):
         """
@@ -282,7 +282,7 @@ class Merger(object):
             for city in cities:
                 c.write(city + ": " + cities[city] + '\n')
             c.close()
-            # self.__remove_tmp_files("city")
+            self.__remove_tmp_files("city")
 
     def language_index(self):
 

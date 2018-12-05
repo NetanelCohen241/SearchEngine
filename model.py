@@ -53,9 +53,6 @@ class model(object):
         :return:
         """
         self.posting_and_dictionary_path = path
-        with open(path+"/docs.txt", "w+") as out:
-            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
-        out.close()
 
     def reset_memory(self, path):
         """
@@ -118,6 +115,10 @@ class model(object):
         :param stem:
         :return:
         """
+        with open(self.posting_and_dictionary_path + "/docs"+"Stem" if stem else ""+".txt", "w+") as out:
+            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
+        out.close()
+
         stop_words = {}
         with open(self.corpus_path + "/stop_words.txt", "r") as sw:
             lines = sw.readlines()
@@ -147,7 +148,7 @@ class model(object):
         :return:
         """
         starttime = time.time()
-        merger = FileMerge.Merger(self.posting_and_dictionary_path, 2000)
+        merger = FileMerge.Merger(self.posting_and_dictionary_path, 500)
         file_name="posting"
         if stem:
             file_name+="WithStemming"
