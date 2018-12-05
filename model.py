@@ -39,21 +39,41 @@ class model(object):
         fout.close()
 
     def set_corpus_path(self, path):
+        """
+        update the courpus path
+        :param path: the updated path
+        :return:
+        """
         self.corpus_path = path
 
     def set_posting_and_dictionary_path(self, path):
+        """
+        update the path of the posting and dictionary and open the docs.txt file
+        :param path:
+        :return:
+        """
         self.posting_and_dictionary_path = path
         with open(path+"/docs.txt", "w+") as out:
             out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
         out.close()
 
     def reset_memory(self, path):
+        """
+        delete  al files in the given path
+        :param path:
+        :return:
+        """
         files_to_delete = os.listdir(path)
         for file in files_to_delete:
             os.remove(path + "/" + str(file))
         self.term_dictionary.clear()
 
     def read_dictionary_from_file(self,stem_flag):
+        """
+        reade  from a txt  file nd bulding the term dictionary
+        :param stem_flag: indicate if to reade stemmed dictionary or not
+        :return:
+        """
         file_name= "/dictionary.txt" if not stem_flag else "/dictionaryWithStemming.txt"
         with open(self.posting_and_dictionary_path + file_name, "r") as f:
             txt = f.readlines()
@@ -68,6 +88,9 @@ class model(object):
 
 
     def fill_cites(self):
+        """
+        do http request to API to get relevent information about capital cities
+        """
         response = requests.get("https://restcountries.eu/rest/v2/all")
         json_content = json.loads(response.text)
         i = 0
@@ -81,10 +104,20 @@ class model(object):
         return self.term_dictionary
 
     def index(self, index_element):
+        """
+        this function start the indexing process
+        :param index_element: all the parameter the function create_index need
+        :return:
+        """
         idx = Indexer.Index(index_element.corpus_path, index_element.posting_path, self.cities_from_api, index_element.stop_words)
         idx.create_index(index_element.stem, index_element.id, index_element.block_size)
 
     def start_index(self, stem):
+        """
+        this function split the corpus to process
+        :param stem:
+        :return:
+        """
         stop_words = {}
         with open(self.corpus_path + "/stop_words.txt", "r") as sw:
             lines = sw.readlines()
@@ -108,7 +141,11 @@ class model(object):
         self.start_merge(stem)
 
     def start_merge(self, stem):
-
+        """
+        merge the temporal posting files
+        :param stem: if stemming exist in the files
+        :return:
+        """
         starttime = time.time()
         merger = FileMerge.Merger(self.posting_and_dictionary_path, 2000)
         file_name="posting"

@@ -27,8 +27,8 @@ class view(object):
 
         # self.lang_chosse.set('English')  # set the default option
         #widdgets on the gui
-        self.entry_corpus = Text(self.master, height=2, width=100)
-        self.entry_posting_and_dict = Text(self.master, height=2, width=100)
+        self.entry_corpus = Text(self.master, height=2, width=50)
+        self.entry_posting_and_dict = Text(self.master, height=2, width=50)
         self.b_browse_corpus=Button(self.master,compound=LEFT, text="Browse corpus path")
         self.b_browse_posting_and_dict=Button(self.master,compound=LEFT, text="Browse posting and dictionary path")
         self.b_reset=Button(self.master, text="Reset")
@@ -80,6 +80,9 @@ class view(object):
 
 
     def clik_on_reset(self, event):
+        if self.posting_path == "":
+            messagebox.showerror("Error","you must enter the posting and dictionary path before reset")
+            return
         self.control.delete_files(self.posting_path)
 
 
@@ -102,12 +105,15 @@ class view(object):
         text.insert(END,to_display)
 
     def load_dictionary(self, event):
+        if self.posting_path == "":
+            messagebox.showerror("Error", "you must enter the posting and dictionary path before Loadind dictionary")
+            return
         try:
             self.control.load_dictionary(self.stemFlag.get()!=0)
             messagebox.showinfo("Load successful","Dictionary was loaded to the RAM")
             self.dic_in_RAM=True
         except:
-            if self.stemFlag==0:
+            if self.stemFlag.get()==0:
                 messagebox.showerror("Error",
                                  "there is no dictionary.txt file in the posting path")
             else:
@@ -149,7 +155,7 @@ class view(object):
 def main():
     root = Tk()
     root.title("Search Engine")
-    root.geometry("1000x450")
+    root.geometry("600x300")
     root.resizable(0,0)
     Model = model()
     Control = contoller.controller( Model )
