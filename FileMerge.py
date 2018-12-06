@@ -275,7 +275,6 @@ class Merger(object):
                                                   + "," + str(self.dictionary[city[0].lower()].pointer)
                         except:
                             x = i
-                            print(str(i) + "    " + city[0])
 
         # write cities to disk
         with open(self.files_to_merge_path + "/cities.txt", "w+") as c:
