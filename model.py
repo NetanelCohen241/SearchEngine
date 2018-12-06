@@ -115,7 +115,7 @@ class model(object):
         :return:
         """
         with open(self.posting_and_dictionary_path + "/docsStem" if stem else self.posting_and_dictionary_path + "/docs.txt", "w+") as out:
-            out.write("Number            City            CityLocations             NumOfUniqeTerms    maxTf\n")
+            out.write("Number            City           NumOfUniqeTerms    maxTf       Date\n")
         out.close()
 
         stop_words = {}
