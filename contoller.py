@@ -6,6 +6,10 @@ import pandas as pd
 class controller(object):
     def __init__(self, model=None):
         self.model=model
+        self.stem=False
+
+    def set_stem(self,stem):
+        self.stem=stem
 
     def delete_files(self,path):
         """
@@ -30,18 +34,18 @@ class controller(object):
         index=["#"]*len(dic["term-freq"])
         data = {'Term': list(dic["term"]), "Term-frequency": list(dic["term-freq"])}
         df = pd.DataFrame(data=data,index=index)
-        df = df.sort_values("Term-frequency", 0, False)
+        # df = df.sort_values("Term-frequency", 0, False)
         return df.to_string()
 
-    def start_indexing(self,stem_flag):
+    def start_indexing(self):
         """
         this function start the indexing
         :param corpusPath: location of the courpos
         :param postingPath: location of posting files
         :return:
         """
-        print("start indexing...\nCourpus Path: {0}\nPosting Path: {1}\nStemmer: {2}".format(self.model.corpus_path, self.model.posting_and_dictionary_path,stem_flag))
-        self.model.start_index(stem_flag)
+        print("start indexing...\nCourpus Path: {0}\nPosting Path: {1}\nStemmer: {2}".format(self.model.corpus_path, self.model.posting_and_dictionary_path,self.stem))
+        self.model.start_index(self.stem)
         pass
 
     def set_corpus_path(self,path):
