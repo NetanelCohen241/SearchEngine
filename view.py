@@ -35,12 +35,13 @@ class view(object):
         self.master = master
         self.stemFlag = IntVar()
         self.corpus_path=""
+        self.qry_path=""
         self.posting_path=""
         self.dic_in_RAM=False
         self.lang_chosse=StringVar(master)
-        choices = {'start indexing to see languages'}
-        self.popupMenu =  OptionMenu(self.master,choices,*choices)
-        Label(master, text="Choose a Language:").grid(row=2, column=0,sticky=E)
+        # choices = {'start indexing to see languages'}
+        # self.popupMenu =  OptionMenu(self.master,choices,*choices)
+        # Label(master, text="Choose a Language:").grid(row=2, column=0,sticky=E)
 
         # self.lang_chosse.set('English')  # set the default option
         #widdgets on the gui
@@ -53,21 +54,52 @@ class view(object):
         self.b_load_dictionary=Button(self.master,compound=LEFT, text="Load Dictionary",command=lambda : self.load_dictionary())
         self.b_start=Button(self.master, text="Start Indexing",command=lambda : self.clik_on_start())
         self.stemCheck=Checkbutton(self.master,text="Stemming?",variable=self.stemFlag)
+        self.b_open_query = Button(self.master, compound=LEFT, text="Open query options", command=lambda: self.query_options())
 
         self.entry_corpus.grid(row=0, column=0)
         self.b_browse_corpus.grid(row=0, column=1,sticky=N+S+E+W)
-        # self.labe2.grid(row=1, column=0)
         self.entry_posting_and_dict.grid(row=1, column=0)
         self.b_browse_posting_and_dict.grid(row=1, column=1,sticky=N+S+E+W)
-        self.popupMenu.grid(row=2, column=1,sticky=W)
-        # self.list.grid(row=2,column=0,sticky=N+S+E+W)
-        # self.labe3.grid(row=4, column=0)
+        # self.popupMenu.grid(row=2, column=1,sticky=W)
+
         self.stemCheck.grid(row=2,column=0,sticky=W)
         self.b_dict.grid(row=5,column=0,columnspan =2,sticky=N+S+E+W)
         self.b_load_dictionary.grid(row=6, column=0,columnspan =2,sticky=N+S+E+W)
         self.b_reset.grid(row=7, column=0,columnspan =2,sticky=N+S+E+W)
         self.b_start.grid(row=8, column=0,columnspan =2,sticky=N+S+E+W)
+        self.b_open_query.grid(row=9, column=0,columnspan =2,sticky=N+S+E+W)
 
+
+    def query_options(self):
+
+        if self.posting_path == "":
+            messagebox.showerror("Error", "you must enter the posting and dictionary path before you can query")
+            return
+        self.load_dictionary()
+        self.semanticFlag = IntVar()
+        qurey_window = Toplevel(self.master)
+        qurey_window.title("Query window")
+        qurey_window.geometry("500x400")
+        self.semantic_check=Checkbutton(qurey_window,text="Semantic Treatment?",variable=self.semanticFlag)
+        self.q_box_manual=Text(qurey_window, height=2, width=30)
+        self.q_box_from_path = Text(qurey_window, height=2, width=30)
+        self.b_run = Button(qurey_window, text="Run query", command=lambda: self.clik_on_run())
+        self.b_browse_qurey = Button(qurey_window, compound=LEFT, text="Browse query path",command=lambda: self.clik_on_browse_query())
+        Label(qurey_window,text="enter custom query: ").grid(row=0,column=0)
+        Label(qurey_window,text="enter query from a file: ").grid(row=1,column=0)
+        self.q_box_manual.grid(row=0,column=1,sticky=N+S+E+W)
+        self.b_run.grid(row=0,column=2,sticky=N+S+E+W)
+        self.q_box_from_path.grid(row=1,column=1,sticky=N+S+E+W,pady=30)
+        self.b_browse_qurey.grid(row=1,column=2,sticky=N+S+E+W,pady=30)
+        self.languge_selector = Listbox(qurey_window,selectmode = "multiple" )
+        Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=3, column=1,columnspan=1,pady=15)
+        self.semantic_check.grid(row=2,column=1,stick='NSW',padx=60)
+        vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.languge_selector.yview)
+        vscroll.place(in_=self.languge_selector, relx=1.0, relheight=1.0, bordermode="outside")
+        self.languge_selector['yscroll'] = vscroll.set
+        self.languge_selector.grid(row=4,column=1,columnspan=2,sticky=N+S+W,padx=60)
+
+        self.fill_cities()
 
     def clik_on_browse_corpus(self):
         """
@@ -84,6 +116,7 @@ class view(object):
             self.entry_corpus.insert(END, self.corpus_path)
         except:
             pass
+
 
     def clik_on_browse_posting_and_dict(self):
         """
@@ -113,7 +146,6 @@ class view(object):
             return
         self.control.delete_files(self.posting_path)
         messagebox.showinfo("reset","All files from {0} were deleted".format(self.posting_path))
-
 
     def display_dict(self):
         """
@@ -153,10 +185,12 @@ class view(object):
         except:
             if self.stemFlag.get()==0:
                 messagebox.showerror("Error",
-                                 "there is no dictionary.txt file in the posting path")
+                                     "there is no dictionary.txt file in the posting path")
             else:
                 messagebox.showerror("Error",
                                      "there is no dictionaryWithStemming.txt file in the posting path")
+
+
 
     def clik_on_start(self):
         """
@@ -188,8 +222,6 @@ class view(object):
             messagebox.showerror("Error",repr(e))
             return
 
-
-
     def disabel_buttons(self):
         self.b_start.config(state=DISABLED)
         self.b_browse_corpus.config(state=DISABLED)
@@ -198,6 +230,7 @@ class view(object):
         self.b_dict.config(state=DISABLED)
         self.b_load_dictionary.config(state=DISABLED)
         self.stemCheck.config(state=DISABLED)
+
 
     def activate_buttons(self):
         self.b_start.config(state=ACTIVE)
@@ -208,30 +241,49 @@ class view(object):
         self.b_load_dictionary.config(state=ACTIVE)
         self.stemCheck.config(state=ACTIVE)
 
-
     def cb(self,stemmer,trash):
-            index_time = time.time() - self.start_time
-            with open(self.posting_path + "/languages.txt") as f:
-                choices = {'All'}
-                for i in f.readlines():
-                    choices.add(i)
-                choices = sorted(choices)
-                self.popupMenu = OptionMenu(self.master, self.lang_chosse, *choices)
-                self.popupMenu.grid(row=2, column=1, sticky=W)
-            f.close()
-            num_of_docs = 0
-            with open(self.posting_path + "/docs.txt" if not stemmer else self.posting_path + "/docsStem.txt") as f:
-                num_of_docs = len(f.readlines())
-            f.close()
-            with open(
-                            self.posting_path + "/dictionary.txt" if not stemmer else self.posting_path + "/dictionaryWithStemming.txt") as f:
-                num_of_terms = len(f.readlines())
-            f.close()
-            messagebox.showinfo("Indexing finished",
-                                "{0} documents were indexed\n{1} uniqe term were created\nTotal time in sec: {2}"
-                                .format(num_of_docs, num_of_terms, int(index_time)))
-            self.activate_buttons()
+        index_time = time.time() - self.start_time
+        num_of_docs = 0
+        with open(self.posting_path + "/docs.txt" if not stemmer else self.posting_path + "/docsStem.txt") as f:
+            num_of_docs = len(f.readlines())
+        f.close()
+        with open(
+                self.posting_path + "/dictionary.txt" if not stemmer else self.posting_path + "/dictionaryWithStemming.txt") as f:
+            num_of_terms = len(f.readlines())
+        f.close()
+        messagebox.showinfo("Indexing finished",
+                            "{0} documents were indexed\n{1} uniqe term were created\nTotal time in sec: {2}"
+                            .format(num_of_docs, num_of_terms, int(index_time)))
+        self.activate_buttons()
 
+    def clik_on_browse_query(self):
+        try:
+            self.qry_path = filedialog.askopenfilename()
+            print(self.qry_path)
+            self.q_box_from_path.delete('1.0', END)
+            self.q_box_from_path.insert(END, self.qry_path)
+        except:
+            pass
+
+    def clik_on_run(self):
+        lan_choise=[]
+        i= self.languge_selector.curselection()
+        idx=0
+        for x in self.choices:
+            if idx in i:
+                lan_choise.append(x)
+            idx+=1
+
+    def fill_cities(self):
+        self.choices = []
+        with open(self.posting_path + "/cities.txt") as f:
+            idx=0
+            for i in f.readlines():
+                city=i.split()[0].replace(":","")
+                self.choices.append(city)
+                self.languge_selector.insert(idx,city)
+                idx += 1
+        f.close()
 
 
 def main():

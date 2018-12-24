@@ -30,13 +30,13 @@ class model(object):
         self.term_dictionary = {}
         self.fake = ""
         self.cities_from_api = {}
-        self.fill_cites()
+        # self.fill_cites()
         self.data = 5
         self.corpus_path = ""
         self.posting_and_dictionary_path = ""
-        with open("language.txt", "w+") as fout:
-            pass
-        fout.close()
+        # with open("language.txt", "w+") as fout:
+        #     pass
+        # fout.close()
 
     def set_corpus_path(self, path):
         """
