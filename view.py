@@ -91,13 +91,13 @@ class view(object):
         self.b_run.grid(row=0,column=2,sticky=N+S+E+W)
         self.q_box_from_path.grid(row=1,column=1,sticky=N+S+E+W,pady=30)
         self.b_browse_qurey.grid(row=1,column=2,sticky=N+S+E+W,pady=30)
-        self.languge_selector = Listbox(qurey_window,selectmode = "multiple" )
+        self.city_selector = Listbox(qurey_window, selectmode ="multiple")
         Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=3, column=1,columnspan=1,pady=15)
         self.semantic_check.grid(row=2,column=1,stick='NSW',padx=60)
-        vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.languge_selector.yview)
-        vscroll.place(in_=self.languge_selector, relx=1.0, relheight=1.0, bordermode="outside")
-        self.languge_selector['yscroll'] = vscroll.set
-        self.languge_selector.grid(row=4,column=1,columnspan=2,sticky=N+S+W,padx=60)
+        vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.city_selector.yview)
+        vscroll.place(in_=self.city_selector, relx=1.0, relheight=1.0, bordermode="outside")
+        self.city_selector['yscroll'] = vscroll.set
+        self.city_selector.grid(row=4, column=1, columnspan=2, sticky=N + S + W, padx=60)
 
         self.fill_cities()
 
@@ -266,13 +266,16 @@ class view(object):
             pass
 
     def clik_on_run(self):
-        lan_choise=[]
-        i= self.languge_selector.curselection()
+        city_choise=[]
+        i= self.city_selector.curselection()
         idx=0
         for x in self.choices:
             if idx in i:
-                lan_choise.append(x)
+                city_choise.append(x)
             idx+=1
+
+
+
 
     def fill_cities(self):
         self.choices = []
@@ -281,7 +284,7 @@ class view(object):
             for i in f.readlines():
                 city=i.split()[0].replace(":","")
                 self.choices.append(city)
-                self.languge_selector.insert(idx,city)
+                self.city_selector.insert(idx, city)
                 idx += 1
         f.close()
 

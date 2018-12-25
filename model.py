@@ -1,4 +1,6 @@
 import json
+import re
+
 import requests
 
 import multiprocessing
@@ -161,6 +163,20 @@ class model(object):
         merger.city_index()
         merger.language_index()
         print(time.time() - starttime)
+
+
+    def run_queries_file(self,file_path):
+
+
+        with open(file_path+"queries.txt","r") as q:
+
+            queries=q.read()
+            queries_list = queries.split("</top>")
+            for query in queries_list:
+                tmp=query.split("<title>")
+                i=tmp[0].split()
+                query_number = i[len(i)-1]
+                query_content = tmp[1].split("<desc>")[0]
 
 
 
