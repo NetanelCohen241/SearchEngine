@@ -72,3 +72,5 @@ class controller(object):
         """
         self.model.read_dictionary_from_file(stem)
 
+    def run_query_from_file(self,path):
+        self.model.run_queries_file(path)

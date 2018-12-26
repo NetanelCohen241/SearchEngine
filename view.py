@@ -77,27 +77,44 @@ class view(object):
             return
         self.load_dictionary()
         self.semanticFlag = IntVar()
+        self.save_file_check = IntVar()
+        self.detect_entities = IntVar()
+        self.res_path=""
         qurey_window = Toplevel(self.master)
         qurey_window.title("Query window")
-        qurey_window.geometry("500x400")
+        qurey_window.geometry("620x470")
+        qurey_window.resizable(0, 0)
         self.semantic_check=Checkbutton(qurey_window,text="Semantic Treatment?",variable=self.semanticFlag)
+        self.save_in_file_check=Checkbutton(qurey_window,text="save query results in a file?",variable=self.save_file_check,command=lambda: self.save_or_not())
+        self.detect=Checkbutton(qurey_window,text="Detect Entities?",variable=self.detect_entities)
         self.q_box_manual=Text(qurey_window, height=2, width=30)
         self.q_box_from_path = Text(qurey_window, height=2, width=30)
+        self.q_save_path = Text(qurey_window, height=2, width=30)
         self.b_run = Button(qurey_window, text="Run query", command=lambda: self.clik_on_run())
         self.b_browse_qurey = Button(qurey_window, compound=LEFT, text="Browse query path",command=lambda: self.clik_on_browse_query())
+        self.b_save_to_file = Button(qurey_window,compound=LEFT, text="Browse", command=lambda: self.click_on_browse_resulat())
+        self.b_run_from_file = Button(qurey_window,compound=LEFT, text="run qurey file", command=lambda: self.clik_on_run_from_file())
         Label(qurey_window,text="enter custom query: ").grid(row=0,column=0)
         Label(qurey_window,text="enter query from a file: ").grid(row=1,column=0)
+        Label(qurey_window,text="enter result path: ",compound=LEFT).grid(row=2,column=0)
         self.q_box_manual.grid(row=0,column=1,sticky=N+S+E+W)
-        self.b_run.grid(row=0,column=2,sticky=N+S+E+W)
+        self.b_run.grid(row=0,column=2,columnspan=2,sticky=N+S+E+W)
         self.q_box_from_path.grid(row=1,column=1,sticky=N+S+E+W,pady=30)
         self.b_browse_qurey.grid(row=1,column=2,sticky=N+S+E+W,pady=30)
+        self.b_run_from_file.grid(row=1,column=3,sticky=N+S+E+W,pady=30)
+
+        self.q_save_path.grid(row=2,column=1,sticky=S+W+E+W,pady=30)
         self.city_selector = Listbox(qurey_window, selectmode ="multiple")
-        Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=3, column=1,columnspan=1,pady=15)
-        self.semantic_check.grid(row=2,column=1,stick='NSW',padx=60)
+        Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=5, column=1,columnspan=1,pady=15)
+        self.b_save_to_file.grid(row=2,column=2,columnspan=2,sticky=N+S+E+W,pady=30)
+        self.semantic_check.grid(row=4,column=0,stick='NSW',padx=20)
+        self.save_in_file_check.grid(row=4,column=1,stick='NSW', padx=30)
+        self.detect.grid(row=4,column=2,columnspan=2,stick='NSW', padx=20)
+        self.b_save_to_file.config(state=DISABLED)
         vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.city_selector.yview)
         vscroll.place(in_=self.city_selector, relx=1.0, relheight=1.0, bordermode="outside")
         self.city_selector['yscroll'] = vscroll.set
-        self.city_selector.grid(row=4, column=1, columnspan=2, sticky=N + S + W, padx=60)
+        self.city_selector.grid(row=6, column=1, columnspan=2, sticky=N + S + W, padx=60)
 
         self.fill_cities()
 
@@ -199,7 +216,7 @@ class view(object):
         :return:
         """
 
-        stemmer = self.stemFlag.get()!=0
+        stemmer = self.stemFlag.get()!= 0
         if self.corpus_path=="" or self.posting_path=="":
             messagebox.showerror("input Error","sorry, You need to Select the following information:\ncourpus path, posting path")
             return
@@ -259,7 +276,6 @@ class view(object):
     def clik_on_browse_query(self):
         try:
             self.qry_path = filedialog.askopenfilename()
-            print(self.qry_path)
             self.q_box_from_path.delete('1.0', END)
             self.q_box_from_path.insert(END, self.qry_path)
         except:
@@ -287,6 +303,26 @@ class view(object):
                 self.city_selector.insert(idx, city)
                 idx += 1
         f.close()
+
+    def clik_on_run_from_file(self):
+        self.control.run_query_from_file(self.qry_path)
+        pass
+
+    def click_on_browse_resulat(self):
+        try:
+            self.res_path = filedialog.askdirectory()
+            self.control.set_posting_path(self.posting_path)
+            self.entry_posting_and_dict.delete('1.0', END)
+            self.entry_posting_and_dict.insert(END, self.posting_path)
+        except:
+            pass
+
+    def save_or_not(self):
+        flag= self.save_file_check.get()== 0
+        if flag:
+            self.b_save_to_file.config(state=DISABLED)
+        else:
+            self.b_save_to_file.config(state=ACTIVE)
 
 
 def main():
