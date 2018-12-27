@@ -80,6 +80,8 @@ class view(object):
         self.save_file_check = IntVar()
         self.detect_entities = IntVar()
         self.res_path=""
+        self.qry_path=""
+        self.qurey=""
         qurey_window = Toplevel(self.master)
         qurey_window.title("Query window")
         qurey_window.geometry("620x470")
@@ -289,6 +291,11 @@ class view(object):
             if idx in i:
                 city_choise.append(x)
             idx+=1
+        qry = self.q_box_manual.get(1.0, END)
+        self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise)
+
+
+
 
 
 
@@ -305,8 +312,11 @@ class view(object):
         f.close()
 
     def clik_on_run_from_file(self):
-        self.control.run_query_from_file(self.qry_path)
-        pass
+        if(self.b_browse_qurey == ""):
+            messagebox.showerror("Path Error", " you need to provide qury file path")
+            return;
+        results = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0)
+
 
     def click_on_browse_resulat(self):
         try:
