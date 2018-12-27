@@ -71,6 +71,7 @@ class controller(object):
         :return:
         """
         self.model.read_dictionary_from_file(stem)
+        self.model.read_docs_details(stem)
 
 
     def run_query_from_file(self,path,semantic):

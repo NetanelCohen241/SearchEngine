@@ -12,6 +12,8 @@ import time
 import FileMerge
 from FileMerge import DictionaryElement
 import Indexer
+from Search import Searcher
+
 
 class IndexElement(object):
 
@@ -27,18 +29,16 @@ class IndexElement(object):
 class model(object):
 
     def __init__(self):
-        ##adding city file
-        ##city dict{} from api
+
         self.term_dictionary = {}
         self.fake = ""
         self.cities_from_api = {}
+        self.documents = {}
         # self.fill_cites()
         self.data = 5
         self.corpus_path = ""
         self.posting_and_dictionary_path = ""
-        # with open("language.txt", "w+") as fout:
-        #     pass
-        # fout.close()
+
 
     def set_corpus_path(self, path):
         """
@@ -84,6 +84,17 @@ class model(object):
                 e.corpus_tf = int(pos[2])
                 self.term_dictionary[l[0]] = e
         f.close()
+
+    def read_docs_details(self, stem):
+
+        with open(self.posting_and_dictionary_path+"/docsStem.txt" if stem else self.posting_and_dictionary_path+"/docs.txt","r") as d:
+
+            docs=d.readlines()
+            del docs[0]
+            for line in docs:
+                tmp=line.split()
+                self.documents[tmp[0]]=tmp[5]
+
 
     def fill_cites(self):
         """
@@ -165,18 +176,27 @@ class model(object):
         print(time.time() - starttime)
 
 
-    def run_queries_file(self,file_path):
+    def run_queries_file(self,file_path,semantic):
 
 
-        with open(file_path+"queries.txt","r") as q:
-
-            queries=q.read()
-            queries_list = queries.split("</top>")
+        with open(file_path+"/queries.txt","r") as q:
+            queries=dict()
+            queries_list = q.read().split("</top>")
             for query in queries_list:
                 tmp=query.split("<title>")
                 i=tmp[0].split()
                 query_number = i[len(i)-1]
                 query_content = tmp[1].split("<desc>")[0]
+                queries[query_number]=query_content
+            searcher = Searcher(queries,self.term_dictionary,self.documents,237,self.posting_and_dictionary_path)
+            return searcher.run()
+
+
+    def rum_custom_query(self, query_content, semanticFlag,city_choise):
+
+        searcher = Searcher({}, self.term_dictionary, self.documents, 237, self.posting_and_dictionary_path)
+        return searcher.run_query(query_content)
+
 
 
 

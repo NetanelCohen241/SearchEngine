@@ -28,5 +28,5 @@ class Document:
 
     def to_string(self):
         return "{0}            {1}            {2}             {3}            {4}"\
-                .format(self.docNumber, self.city, self.num_of_unique_terms, self.max_tf, self.date_of_publish)
+                .format(self.docNumber, self.city if self.city != "" else "----", self.num_of_unique_terms, self.max_tf, self.date_of_publish)
 
