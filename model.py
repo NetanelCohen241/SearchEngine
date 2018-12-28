@@ -10,6 +10,7 @@ import os
 import time
 
 import FileMerge
+import Parse
 from FileMerge import DictionaryElement
 import Indexer
 from Search import Searcher
@@ -38,7 +39,7 @@ class model(object):
         self.data = 5
         self.corpus_path = ""
         self.posting_and_dictionary_path = ""
-
+        self.avgl=0
 
     def set_corpus_path(self, path):
         """
@@ -87,15 +88,16 @@ class model(object):
 
     def read_docs_details(self, stem):
 
-        with open(self.posting_and_dictionary_path+"/docsStem.txt" if stem else self.posting_and_dictionary_path+"/docs.txt","r") as d:
-
-            docs=d.readlines()
+        with open(
+                self.posting_and_dictionary_path + "/docsStem.txt" if stem else self.posting_and_dictionary_path + "/docs.txt",
+                "r") as d:
+            docs = d.readlines()
             del docs[0]
             for line in docs:
-                tmp=line.split()
-                self.documents[tmp[0]]=tmp[5]
-
-
+                tmp = line.split()
+                self.documents[tmp[0]] = [tmp[1],tmp[2]]
+                self.avgl+=int(tmp[1])
+            self.avgl/=len(self.documents)
     def fill_cites(self):
         """
         do http request to API to get relevent information about capital cities
@@ -118,7 +120,8 @@ class model(object):
         :param index_element: all the parameter the function create_index need
         :return:
         """
-        idx = Indexer.Index(index_element.corpus_path, index_element.posting_path, self.cities_from_api, index_element.stop_words)
+        idx = Indexer.Index(index_element.corpus_path, index_element.posting_path, self.cities_from_api,
+                            index_element.stop_words)
         idx.create_index(index_element.stem, index_element.id, index_element.block_size)
 
     def start_index(self, stem):
@@ -127,7 +130,9 @@ class model(object):
         :param stem:
         :return:
         """
-        with open(self.posting_and_dictionary_path + "/docsStem" if stem else self.posting_and_dictionary_path + "/docs.txt", "w+") as out:
+        with open(
+                self.posting_and_dictionary_path + "/docsStem" if stem else self.posting_and_dictionary_path + "/docs.txt",
+                "w+") as out:
             out.write("Number            City           NumOfUniqeTerms    maxTf       Date\n")
         out.close()
 
@@ -142,7 +147,8 @@ class model(object):
         except Exception:
             raise FileNotFoundError("the file stop_words.txt didn't found")
 
-        files_number = len([word for word in os.listdir(self.corpus_path) if os.path.isdir(self.corpus_path + "/" + word)])
+        files_number = len(
+            [word for word in os.listdir(self.corpus_path) if os.path.isdir(self.corpus_path + "/" + word)])
         s = files_number / 46
         tasks = []
         i = 0
@@ -151,7 +157,8 @@ class model(object):
             tasks.append(index_element)
             i += 1
         if files_number % 46 > 0:
-            tasks.append(IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, files_number % 46, stop_words))
+            tasks.append(IndexElement(i, self.corpus_path, self.posting_and_dictionary_path, stem, files_number % 46,
+                                      stop_words))
         starttime = time.time()
         pool = Pool(processes=(multiprocessing.cpu_count()))
         pool.map(self.index, tasks)
@@ -175,28 +182,43 @@ class model(object):
         merger.language_index()
         print(time.time() - starttime)
 
+    def run_queries_file(self, file_path, semantic):
 
-    def run_queries_file(self,file_path,semantic):
-
-
-        with open(file_path+"/queries.txt","r") as q:
-            queries=dict()
+        with open(file_path , "r") as q:
+            queries = dict()
             queries_list = q.read().split("</top>")
             for query in queries_list:
-                tmp=query.split("<title>")
-                i=tmp[0].split()
-                query_number = i[len(i)-1]
-                query_content = tmp[1].split("<desc>")[0]
-                queries[query_number]=query_content
-            searcher = Searcher(queries,self.term_dictionary,self.documents,237,self.posting_and_dictionary_path)
-            return searcher.run()
+                if query == "":
+                    continue
+                tmp = query.split("<title>")
+                query_number= tmp[0].split(':')[1].replace('\n','').replace(' ','')
+                query_content = tmp[1].split("<desc>")[0].replace('\n','')
+                queries[query_number] = query_content
+            stop_words = {}
+            with open(self.corpus_path + "/stop_words.txt", "r") as sw:
+                lines = sw.readlines()
+                for line in lines:
+                    stop_words[line[:len(line) - 1]] = ""
+            sw.close()
+            p = Parse.Parser(stop_words)
+            searcher = Searcher(queries, self.term_dictionary, self.documents, 237, self.posting_and_dictionary_path,p)
 
+            results = searcher.run()
+            self.write_results_to_disk(file_path,results)
+            return results
 
-    def rum_custom_query(self, query_content, semanticFlag,city_choise):
+    def rum_custom_query(self, query_content, semanticFlag, city_choise):
 
-        searcher = Searcher({}, self.term_dictionary, self.documents, 237, self.posting_and_dictionary_path)
+        searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path)
         return searcher.run_query(query_content)
 
+    def write_results_to_disk(self, file_path,results):
 
 
+        with open(self.posting_and_dictionary_path+"/results.txt","w+") as out:
+
+            for query_num in results:
+                for doc_num in results[query_num]:
+                    out.write(str(query_num)+" 0 "+doc_num+" 1 42.38 mt\n")
+            out.close()
 

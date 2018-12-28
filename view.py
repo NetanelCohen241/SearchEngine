@@ -313,7 +313,7 @@ class view(object):
 
     def clik_on_run_from_file(self):
         if(self.b_browse_qurey == ""):
-            messagebox.showerror("Path Error", " you need to provide qury file path")
+            messagebox.showerror("Path Error", " you need to provide query file path")
             return;
         results = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0)
 

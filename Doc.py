@@ -1,10 +1,11 @@
 class Document:
-    def __init__(self,docNumber,txt,city=""):
-        self.docNumber=docNumber
+    def __init__(self,doc_number,length,txt,city=""):
+        self.docNumber=doc_number
         self.txt=txt
         self.city=city
         self.city_locations=[]
         self.num_of_unique_terms=0
+        self.length=length
         self.max_tf=0
         self.date_of_publish= ""
         self.title=[]
@@ -27,6 +28,6 @@ class Document:
 
 
     def to_string(self):
-        return "{0}            {1}            {2}             {3}            {4}"\
-                .format(self.docNumber, self.city if self.city != "" else "----", self.num_of_unique_terms, self.max_tf, self.date_of_publish)
+        return "{0}            {1}            {2}             {3}            {4}           {5}"\
+                .format(self.docNumber, self.length,self.city if self.city != "" else "----", self.num_of_unique_terms, self.max_tf, self.date_of_publish)
 
