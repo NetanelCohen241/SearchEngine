@@ -98,6 +98,8 @@ class model(object):
                 self.documents[tmp[0]] = [tmp[1],tmp[2]]
                 self.avgl+=int(tmp[1])
             self.avgl/=len(self.documents)
+
+
     def fill_cites(self):
         """
         do http request to API to get relevent information about capital cities

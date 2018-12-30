@@ -72,15 +72,14 @@ class view(object):
 
     def query_options(self):
 
-        if self.posting_path == "":
-            messagebox.showerror("Error", "you must enter the posting and dictionary path before you can query")
+        if self.posting_path == "" or self.corpus_path=="":
+            messagebox.showerror("Error", "you must enter the posting and dictionary path and corpus path before you can query")
             return
         self.load_dictionary()
         self.semanticFlag = IntVar()
         self.save_file_check = IntVar()
         self.detect_entities = IntVar()
         self.res_path=""
-        self.qry_path=""
         self.qurey=""
         qurey_window = Toplevel(self.master)
         qurey_window.title("Query window")
@@ -284,16 +283,22 @@ class view(object):
             pass
 
     def clik_on_run(self):
-        city_choise=[]
-        i= self.city_selector.curselection()
-        idx=0
+        if(self.qurey==""):
+            messagebox.showerror("Query Error","qurey cant be empty")
+            return
+        city_choise=self.get_choosen_cites()
+        qry = self.q_box_manual.get(1.0, END)
+        self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,result_path=self.res_path)
+
+    def get_choosen_cites(self):
+        city_choise = []
+        i = self.city_selector.curselection()
+        idx = 0
         for x in self.choices:
             if idx in i:
                 city_choise.append(x)
-            idx+=1
-        qry = self.q_box_manual.get(1.0, END)
-        self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise)
-
+            idx += 1
+        return city_choise
 
 
 
@@ -312,10 +317,10 @@ class view(object):
         f.close()
 
     def clik_on_run_from_file(self):
-        if(self.b_browse_qurey == ""):
+        if(self.qry_path == ""):
             messagebox.showerror("Path Error", " you need to provide query file path")
-            return;
-        results = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0)
+            return
+        results = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0,self.get_choosen_cites(),self.res_path)
 
 
     def click_on_browse_resulat(self):
