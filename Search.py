@@ -39,7 +39,7 @@ class Searcher:
         # need to check about semantic treatment
 
 
-        sorted_query_result = sorted(query_result.items(), key=lambda x: x[1])
+        sorted_query_result = sorted(query_result.items(), key=lambda x: x[1],reverse=True)
         ans= []
         for i in range(0,min(50,len(sorted_query_result))):
             ans.append(sorted_query_result[i][0])

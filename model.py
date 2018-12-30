@@ -201,7 +201,7 @@ class model(object):
                     stop_words[line[:len(line) - 1]] = ""
             sw.close()
             p = Parse.Parser(stop_words)
-            searcher = Searcher(queries, self.term_dictionary, self.documents, 237, self.posting_and_dictionary_path,p)
+            searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
 
             results = searcher.run()
             self.write_results_to_disk(file_path,results)

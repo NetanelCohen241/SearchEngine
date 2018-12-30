@@ -8,7 +8,7 @@ class Ranker(object):
 
     def score_BM25(self,n, f, N, dl, avgl):
         K = self.compute_K(dl, avgl)
-        idf = log((N - n + 0.5)/(n + 0.5))
+        idf = log((N+1)/n)
         second = ((k1 + 1) * f) / (K + f)
         return idf * second
 
