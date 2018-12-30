@@ -182,7 +182,7 @@ class model(object):
         merger.language_index()
         print(time.time() - starttime)
 
-    def run_queries_file(self, file_path, semantic):
+    def run_queries_file(self, file_path, semantic, city_choice, result_path=""):
 
         with open(file_path , "r") as q:
             queries = dict()
@@ -207,7 +207,7 @@ class model(object):
             self.write_results_to_disk(file_path,results)
             return results
 
-    def rum_custom_query(self, query_content, semanticFlag, city_choise):
+    def rum_custom_query(self, query_content, semantic_flag, city_choice, result_path=""):
 
         searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path)
         return searcher.run_query(query_content)
