@@ -35,7 +35,7 @@ class model(object):
         self.fake = ""
         self.cities_from_api = {}
         self.documents = {}
-        # self.fill_cites()
+        self.fill_cites()
         self.data = 5
         self.corpus_path = ""
         self.posting_and_dictionary_path = ""
