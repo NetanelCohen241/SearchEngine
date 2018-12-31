@@ -368,6 +368,8 @@ class Parser(object):
                         if len(rangeTokens) == 3:
                             self.add_to_dictionary(doc_dictionary, [rangeTokens[0], rangeTokens[1], rangeTokens[2]], i)
                             term = tokens[i]
+                        elif rangeTokens[0]=="":
+                            term=rangeTokens[1]
                         else:
                             t1 = rangeTokens[0]
                             t2 = rangeTokens[1]

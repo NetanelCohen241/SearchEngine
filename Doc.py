@@ -1,11 +1,11 @@
 class Document:
-    def __init__(self,doc_number,length,txt,city=""):
+    def __init__(self,doc_number,txt,city=""):
         self.docNumber=doc_number
         self.txt=txt
         self.city=city
         self.city_locations=[]
         self.num_of_unique_terms=0
-        self.length=length
+        self.length=0
         self.max_tf=0
         self.date_of_publish= ""
         self.title=[]

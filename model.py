@@ -208,7 +208,7 @@ class model(object):
             p = Parse.Parser(self.stop_words)
             searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
 
-            results = searcher.run()
+            results = searcher.run(city_choice)
             if result_path != "":
                 self.write_results_to_disk(result_path,results)
             return results
@@ -217,7 +217,7 @@ class model(object):
 
         p = Parse.Parser(self.stop_words)
         searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
-        results= searcher.run_query(query_content)
+        results= searcher.run_query(query_content, city_choice)
         if result_path != "":
             self.write_results_to_disk(result_path, {"15":results})
         return results

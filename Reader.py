@@ -64,7 +64,7 @@ class ReadFile(object):
                     textContent = (i.split("<TEXT>")[1]).split("</TEXT>")[0]
                     if textContent.__contains__("<F P=105>"):
                         doc_language = re.findall(r'<F P=105>(.*?)</F>', textContent)[0]
-                doc = Doc.Document(docNumber, len(textContent),textContent, docCity)
+                doc = Doc.Document(docNumber,textContent, docCity)
                 # if doc.city != "" and docCity!=[]:
                 #     self.find_all_locations_in_text(doc)
                 if i.__contains__("<DATE1>"):

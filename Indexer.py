@@ -52,11 +52,15 @@ class Index(object):
         doc_list=read.startAction(pid*block_size,block_size)
 
         for doc in doc_list:
-            doc_dictionary,max_tf=self.parser.parse(doc.txt+" "+doc.city,with_stemming)
+            doc_dictionary,max_tf=self.parser.parse(doc.txt+" "+doc.city+" "+" ".join(doc.title),with_stemming)
             doc.title,z=self.parser.parse(" ".join(doc.title),with_stemming)
             doc.title=doc.title.keys()
             doc.set_num_of_uniqe_terms(len(doc_dictionary.keys()))
             doc.set_maxtf(max_tf)
+            length=0
+            for doc_num in doc_dictionary:
+                length+=doc_dictionary[doc_num]
+            doc.length=length
             if not language.__contains__(doc.language) and doc.language != "None":
                 language[doc.language]=""
             self.insert_to_posting_list(posting_list, doc_dictionary, doc)
