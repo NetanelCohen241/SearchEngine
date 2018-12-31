@@ -23,15 +23,15 @@ class Searcher:
 
     def run_query(self, query):
         query_result = dict()
-        doc_dict=dict()
         query_terms, _ = self.parser.parse(query, False)
         for term in query_terms:
-            if term in self.dictionary:
+            doc_dict = dict()
+            if term.lower() in self.dictionary or term.upper() in self.dictionary:
                 self.read_term_postinglist(doc_dict,term)  # retrieve index entry
                 for docid in doc_dict:  # for each document and its word frequency
-                    score = self.ranker.score_BM25(n=len(doc_dict), f=doc_dict[docid], N=len(self.documents),
+                    score = self.ranker.score_BM25(n=len(doc_dict), f=doc_dict[docid][0], N=len(self.documents),
                                                    dl=self.documents[docid][0],
-                                                   avgl=self.avgl)  # calculate score
+                                                   avgl=self.avgl, cf=query_terms[term].frq,title=doc_dict[docid][1])  # calculate score
                     if docid in query_result:  # this document has already been scored once
                         query_result[docid] += score
                     else:
@@ -47,6 +47,8 @@ class Searcher:
 
     def read_term_postinglist(self, doc_dict, term):
 
+        if term.lower() in self.dictionary: term=term.lower()
+        elif term.upper() in self.dictionary: term=term.upper()
         dictionary_element=self.dictionary[term]
         with open(self.posting_path+"/"+dictionary_element.posting_file,"r") as fin:
             fin.seek(dictionary_element.pointer)
@@ -56,8 +58,10 @@ class Searcher:
             for element in posting:
                 tmp=element.split('[')
                 doc_num= tmp[0][:-1]
-                freq=len(tmp[1].split(']')[0].split(','))
-                doc_dict[doc_num]=freq
+                tmp=tmp[1].split(']')
+                freq=len(tmp[0].split(','))
+                title=tmp[1].replace(',','')
+                doc_dict[doc_num]=[freq,1 if title=="T" else 0]
 
 
         return doc_dict
