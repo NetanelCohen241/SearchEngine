@@ -326,9 +326,8 @@ class view(object):
     def click_on_browse_resulat(self):
         try:
             self.res_path = filedialog.askdirectory()
-            self.control.set_posting_path(self.posting_path)
-            self.entry_posting_and_dict.delete('1.0', END)
-            self.entry_posting_and_dict.insert(END, self.posting_path)
+            self.q_save_path.delete('1.0', END)
+            self.q_save_path.insert(END, self.res_path)
         except:
             pass
 
