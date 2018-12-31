@@ -59,7 +59,7 @@ class Index(object):
             doc.set_maxtf(max_tf)
             length=0
             for doc_num in doc_dictionary:
-                length+=doc_dictionary[doc_num]
+                length+=len(doc_dictionary[doc_num].locations.split(','))
             doc.length=length
             if not language.__contains__(doc.language) and doc.language != "None":
                 language[doc.language]=""
