@@ -40,6 +40,8 @@ class model(object):
         self.corpus_path = ""
         self.posting_and_dictionary_path = ""
         self.avgl=0
+        self.stop_words = {}
+
 
     def set_corpus_path(self, path):
         """
@@ -48,6 +50,11 @@ class model(object):
         :return:
         """
         self.corpus_path = path
+        with open(self.corpus_path + "/stop_words.txt", "r") as sw:
+            lines = sw.readlines()
+            for line in lines:
+                self.stop_words[line[:len(line) - 1]] = ""
+        sw.close()
 
     def set_posting_and_dictionary_path(self, path):
         """
@@ -194,30 +201,31 @@ class model(object):
                     continue
                 tmp = query.split("<title>")
                 query_number= tmp[0].split(':')[1].replace('\n','').replace(' ','')
-                query_content = tmp[1].split("<desc>")[0].replace('\n','')
-                queries[query_number] = query_content
-            stop_words = {}
-            with open(self.corpus_path + "/stop_words.txt", "r") as sw:
-                lines = sw.readlines()
-                for line in lines:
-                    stop_words[line[:len(line) - 1]] = ""
-            sw.close()
-            p = Parse.Parser(stop_words)
+                tmp= tmp[1].split("<desc>")
+                query_content =tmp[0].replace('\n',' ')
+                queries[query_number] = query_content+tmp[1].split("<narr>")[0][12:].replace('\n',' ')
+
+            p = Parse.Parser(self.stop_words)
             searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
 
             results = searcher.run()
-            self.write_results_to_disk(file_path,results)
+            if result_path != "":
+                self.write_results_to_disk(result_path,results)
             return results
 
     def rum_custom_query(self, query_content, semantic_flag, city_choice, result_path=""):
 
-        searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path)
-        return searcher.run_query(query_content)
+        p = Parse.Parser(self.stop_words)
+        searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
+        results= searcher.run_query(query_content)
+        if result_path != "":
+            self.write_results_to_disk(result_path, {"15":results})
+        return results
 
-    def write_results_to_disk(self, file_path,results):
+    def write_results_to_disk(self, result_path,results):
 
 
-        with open(self.posting_and_dictionary_path+"/results.txt","w+") as out:
+        with open(result_path+"/results.txt","w+") as out:
 
             for query_num in results:
                 for doc_num in results[query_num]:
