@@ -39,11 +39,7 @@ class view(object):
         self.posting_path=""
         self.dic_in_RAM=False
         self.lang_chosse=StringVar(master)
-        # choices = {'start indexing to see languages'}
-        # self.popupMenu =  OptionMenu(self.master,choices,*choices)
-        # Label(master, text="Choose a Language:").grid(row=2, column=0,sticky=E)
-
-        # self.lang_chosse.set('English')  # set the default option
+        self.entity={}
         #widdgets on the gui
         self.entry_corpus = Text(self.master, height=2, width=50)
         self.entry_posting_and_dict = Text(self.master, height=2, width=50)
@@ -76,6 +72,8 @@ class view(object):
             messagebox.showerror("Error", "you must enter the posting and dictionary path and corpus path before you can query")
             return
         self.load_dictionary()
+        self.load_entity()
+
         self.semanticFlag = IntVar()
         self.save_file_check = IntVar()
         self.detect_entities = IntVar()
@@ -363,6 +361,14 @@ class view(object):
             self.b_save_to_file.config(state=DISABLED)
         else:
             self.b_save_to_file.config(state=ACTIVE)
+
+    def load_entity(self):
+        with open("Test.txt","w") as f:
+            lines=f.readlines()
+            for line in lines:
+                key_value=line.split(':')
+                self.entity[key_value[0]]=key_value[1]
+
 
 
 def main():
