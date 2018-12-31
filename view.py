@@ -83,7 +83,7 @@ class view(object):
         self.qurey=""
         qurey_window = Toplevel(self.master)
         qurey_window.title("Query window")
-        qurey_window.geometry("620x470")
+        # qurey_window.geometry("620x470")
         qurey_window.resizable(0, 0)
         self.semantic_check=Checkbutton(qurey_window,text="Semantic Treatment?",variable=self.semanticFlag)
         self.save_in_file_check=Checkbutton(qurey_window,text="save query results in a file?",variable=self.save_file_check,command=lambda: self.save_or_not())
@@ -106,18 +106,25 @@ class view(object):
 
         self.q_save_path.grid(row=2,column=1,sticky=S+W+E+W,pady=30)
         self.city_selector = Listbox(qurey_window, selectmode ="multiple")
-        Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=5, column=1,columnspan=1,pady=15)
+        self.lan_selector = Listbox(qurey_window, selectmode ="multiple")
+        Label(qurey_window, text="Choose one or more cities: ",compound=CENTER).grid(row=5, column=0,columnspan=1,pady=15)
+        Label(qurey_window, text="Choose one or more languages: ",compound=CENTER).grid(row=5, column=2,columnspan=1,pady=15)
         self.b_save_to_file.grid(row=2,column=2,columnspan=2,sticky=N+S+E+W,pady=30)
         self.semantic_check.grid(row=4,column=0,stick='NSW',padx=20)
         self.save_in_file_check.grid(row=4,column=1,stick='NSW', padx=30)
         self.detect.grid(row=4,column=2,columnspan=2,stick='NSW', padx=20)
         self.b_save_to_file.config(state=DISABLED)
         vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.city_selector.yview)
+        vscroll1 = Scrollbar(qurey_window, orient=VERTICAL, command=self.lan_selector.yview)
         vscroll.place(in_=self.city_selector, relx=1.0, relheight=1.0, bordermode="outside")
+        vscroll1.place(in_=self.lan_selector, relx=1.0, relheight=1.0, bordermode="outside")
         self.city_selector['yscroll'] = vscroll.set
-        self.city_selector.grid(row=6, column=1, columnspan=2, sticky=N + S + W, padx=60)
+        self.lan_selector['yscroll'] = vscroll.set
+        self.city_selector.grid(row=6, column=0, sticky=N + S + W, padx=60)
+        self.lan_selector.grid(row=6, column=2,columnspan=1, sticky=N + S + W)
 
         self.fill_cities()
+        self.fill_lan()
 
     def clik_on_browse_corpus(self):
         """
@@ -288,7 +295,26 @@ class view(object):
             return
         city_choise=self.get_choosen_cites()
         qry = self.q_box_manual.get(1.0, END)
-        self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,result_path=self.res_path)
+        resualt_set = self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,result_path=self.res_path)
+        if self.save_file_check.get()==0 :
+            self.display(resualt_set)
+
+    def clik_on_run_from_file(self):
+        if(self.qry_path == ""):
+            messagebox.showerror("Path Error", " you need to provide query file path")
+            return
+        results_set = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0,self.get_choosen_cites(),self.res_path)
+        if self.save_file_check.get == 0:
+            self.display(results_set)
+
+
+    def display(self, resualt_set):
+        pass
+
+
+
+
+
 
     def get_choosen_cites(self):
         city_choise = []
@@ -299,11 +325,6 @@ class view(object):
                 city_choise.append(x)
             idx += 1
         return city_choise
-
-
-
-
-
 
     def fill_cities(self):
         self.choices = []
@@ -316,12 +337,17 @@ class view(object):
                 idx += 1
         f.close()
 
-    def clik_on_run_from_file(self):
-        if(self.qry_path == ""):
-            messagebox.showerror("Path Error", " you need to provide query file path")
-            return
-        results = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0,self.get_choosen_cites(),self.res_path)
 
+    def fill_lan(self):
+        self.choices_lan = []
+        with open(self.posting_path + "/languages.txt") as f:
+            idx=0
+            for i in f.readlines():
+                lan = i.split()[0].replace(":","")
+                self.choices_lan.append(lan)
+                self.lan_selector.insert(idx, lan)
+                idx += 1
+        f.close()
 
     def click_on_browse_resulat(self):
         try:
