@@ -306,7 +306,7 @@ class view(object):
             return
         s_flag = self.semanticFlag.get() == 1
         flag = self.save_file_check.get() == 1
-        results_set = self.control.run_query_from_file(self.qry_path,s_flag,self.get_choosen_cites(),self.stem_flag.get()==0,self.res_path)
+        results_set = self.control.run_query_from_file(self.qry_path,s_flag,self.get_choosen_cites(),self.stem_flag.get()==1,self.res_path)
         if not flag:
             self.display_new_window(self.display(results_set))
         else:

@@ -1,6 +1,6 @@
 from math import log
 
-k1 = 1.2
+k1 = 1.5
 b = 0.75
 
 class Ranker(object):

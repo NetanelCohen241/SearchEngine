@@ -92,7 +92,7 @@ class model(object):
                 e = DictionaryElement(pos[0])
                 e.pointer = int(pos[1])
                 e.corpus_tf = int(pos[2])
-                if stem_flag:
+                if not stem_flag:
                     self.term_dictionary[l[0]] = e
                 else:
                     self.term_dictionary_with_stemming[l[0]] = e
@@ -200,7 +200,17 @@ class model(object):
         print(time.time() - starttime)
 
     def run_queries_file(self, file_path, semantic_flag, city_choice,stem, result_path=""):
-
+        """
+        This function executes queries file.
+        It responsibility is to separate the file into query list and to extract the relevant information about the query
+        such as title and description
+        :param file_path: path to queries file
+        :param semantic_flag: specified whether to add a semantic treatment
+        :param city_choice: list of cities to filter
+        :param stem: specified whether do stemming
+        :param result_path: path where to save the result file
+        :return:
+        """
         api = datamuse.Datamuse()
 
         with open(file_path , "r") as q:
@@ -217,39 +227,39 @@ class model(object):
                 # ask from api the synonyms of each word on query
                 if semantic_flag:
                     for word in query_content.split():
-                        synonyms = api.suggest(s=word, max=3)
+                        synonyms = api.suggest(s=word, max=1)
                         for item in synonyms:
                             if item["word"] != word.lower():
                                 if item["word"].split()[0] == word.lower():
                                     item["word"]=item["word"].split()[1]
                                 semantic_words += " " + item["word"]
+                    #add the synonyms into query content
                     query_content += semantic_words
-
+                #add the description into query content
                 queries[query_number] = self.remove_stop_words(query_content+tmp[1].split("<narr>")[0][12:].replace('\n',' '))
 
-                # if semantic_flag:
-                #     for word in queries[query_number].split():
-                #         synonyms = api.suggest(s=word, max=3)
-                #         for item in synonyms:
-                #             if item["word"] != word.lower():
-                #                 if item["word"].split()[0] == word.lower():
-                #                     item["word"] = item["word"].split()[1]
-                #                 semantic_words += " " + item["word"]
-                # queries[query_number] += semantic_words
-
             p = Parse.Parser(self.stop_words)
-            searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
+            searcher = Searcher(queries, self.term_dictionary if not stem else self.term_dictionary_with_stemming, self.documents, self.avgl, self.posting_and_dictionary_path,p)
 
-            results = searcher.run(city_choice)
+            results = searcher.run(city_choice,stem)
+            #write the results to disk
             if result_path != "":
                 self.write_results_to_disk(result_path,results)
             return results
 
     def rum_custom_query(self, query_content, semantic_flag, city_choice,stem, result_path=""):
-
+        """
+        This function runs custom query.
+        :param query_content:
+        :param semantic_flag: specified whether to add a semantic treatment
+        :param city_choice: list of cities to filter
+        :param stem: specified whether do stemming
+        :param result_path: path where to save the result file
+        :return:
+        """
         api = datamuse.Datamuse()
         p = Parse.Parser(self.stop_words)
-        searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
+        searcher = Searcher({},self.term_dictionary if not stem else self.term_dictionary_with_stemming, self.documents, self.avgl, self.posting_and_dictionary_path,p)
         semantic_words = ""
         # ask from api the synonyms of each word on query
         if semantic_flag:
@@ -258,14 +268,20 @@ class model(object):
                 for item in synonyms:
                     semantic_words += " " + item["word"] + " " if item["word"] != word.lower() else ""
             query_content += semantic_words
-        results= searcher.run_query(query_content, city_choice)
+        results= searcher.run_query(query_content, city_choice,stem)
+        #write the result content to disk
         if result_path != "":
             self.write_results_to_disk(result_path, {"15":results})
         return {"15":results}
 
     def write_results_to_disk(self, result_path,results):
 
-
+        """
+        This function writes the query result content to disk
+        :param result_path:
+        :param results:
+        :return:
+        """
         with open(result_path+"/results.txt","w+") as out:
 
             for query_num in results:
@@ -274,6 +290,11 @@ class model(object):
             out.close()
 
     def remove_stop_words(self, query):
+        """
+        This function removes stop words from the given query
+        :param query:
+        :return:
+        """
         ans=""
         words= query.split()
         for word in words:
