@@ -199,7 +199,7 @@ class model(object):
         merger.language_index()
         print(time.time() - starttime)
 
-    def run_queries_file(self, file_path, semantic, city_choice,stem, result_path=""):
+    def run_queries_file(self, file_path, semantic_flag, city_choice,stem, result_path=""):
 
         api = datamuse.Datamuse()
 
@@ -214,15 +214,28 @@ class model(object):
                 tmp= tmp[1].split("<desc>")
                 query_content =tmp[0].replace('\n',' ')
                 semantic_words = ""
-                if semantic:
+                # ask from api the synonyms of each word on query
+                if semantic_flag:
                     for word in query_content.split():
                         synonyms = api.suggest(s=word, max=3)
                         for item in synonyms:
-                            semantic_words += " " + item["word"] + " " if item["word"] != word.lower() else ""
+                            if item["word"] != word.lower():
+                                if item["word"].split()[0] == word.lower():
+                                    item["word"]=item["word"].split()[1]
+                                semantic_words += " " + item["word"]
                     query_content += semantic_words
 
                 queries[query_number] = self.remove_stop_words(query_content+tmp[1].split("<narr>")[0][12:].replace('\n',' '))
 
+                # if semantic_flag:
+                #     for word in queries[query_number].split():
+                #         synonyms = api.suggest(s=word, max=3)
+                #         for item in synonyms:
+                #             if item["word"] != word.lower():
+                #                 if item["word"].split()[0] == word.lower():
+                #                     item["word"] = item["word"].split()[1]
+                #                 semantic_words += " " + item["word"]
+                # queries[query_number] += semantic_words
 
             p = Parse.Parser(self.stop_words)
             searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
@@ -234,12 +247,21 @@ class model(object):
 
     def rum_custom_query(self, query_content, semantic_flag, city_choice,stem, result_path=""):
 
+        api = datamuse.Datamuse()
         p = Parse.Parser(self.stop_words)
         searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
+        semantic_words = ""
+        # ask from api the synonyms of each word on query
+        if semantic_flag:
+            for word in query_content.split():
+                synonyms = api.suggest(s=word, max=2)
+                for item in synonyms:
+                    semantic_words += " " + item["word"] + " " if item["word"] != word.lower() else ""
+            query_content += semantic_words
         results= searcher.run_query(query_content, city_choice)
         if result_path != "":
             self.write_results_to_disk(result_path, {"15":results})
-        return results
+        return {"15":results}
 
     def write_results_to_disk(self, result_path,results):
 

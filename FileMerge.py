@@ -87,7 +87,7 @@ class Merger(object):
 
             self.posting_block[term] = merge_content
             total_freq = self.__calculate_total_tf(merge_content)
-            self.__add_to_dictionary(term, "posting" + str(posting_id) + ".txt", posting_list_pointer, total_freq)
+            self.__add_to_dictionary(term, self.file_name + str(posting_id) + ".txt", posting_list_pointer, total_freq)
             posting_list_pointer += len(term) + len(merge_content) + 3
 
             if posting_list_pointer > 200000000:

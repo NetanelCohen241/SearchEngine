@@ -220,6 +220,8 @@ class Parser(object):
         for key in doc_dictionary.keys():
             if not self.__hasNumbers(key):
                 term = e.stem(key)
+                if key.isUpper():
+                    term=term.upper()
             else:
                 term = key
             if temp_dict.__contains__(term):
