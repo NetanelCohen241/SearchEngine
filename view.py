@@ -72,7 +72,7 @@ class view(object):
             messagebox.showerror("Error", "you must enter the posting and dictionary path and corpus path before you can query")
             return
         self.load_dictionary()
-        self.load_entity()
+        # self.load_entity()
 
         self.semanticFlag = IntVar()
         self.save_file_check = IntVar()
