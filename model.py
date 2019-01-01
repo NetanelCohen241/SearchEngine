@@ -1,5 +1,6 @@
 import json
 import re
+import datamuse
 
 import requests
 
@@ -200,6 +201,8 @@ class model(object):
 
     def run_queries_file(self, file_path, semantic, city_choice,stem, result_path=""):
 
+        api = datamuse.Datamuse()
+
         with open(file_path , "r") as q:
             queries = dict()
             queries_list = q.read().split("</top>")
@@ -210,7 +213,16 @@ class model(object):
                 query_number= tmp[0].split(':')[1].replace('\n','').replace(' ','')
                 tmp= tmp[1].split("<desc>")
                 query_content =tmp[0].replace('\n',' ')
-                queries[query_number] = query_content+tmp[1].split("<narr>")[0][12:].replace('\n',' ')
+                semantic_words = ""
+                if semantic:
+                    for word in query_content.split():
+                        synonyms = api.suggest(s=word, max=3)
+                        for item in synonyms:
+                            semantic_words += " " + item["word"] + " " if item["word"] != word.lower() else ""
+                    query_content += semantic_words
+
+                queries[query_number] = self.remove_stop_words(query_content+tmp[1].split("<narr>")[0][12:].replace('\n',' '))
+
 
             p = Parse.Parser(self.stop_words)
             searcher = Searcher(queries, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)
@@ -238,4 +250,15 @@ class model(object):
                 for doc_num in results[query_num]:
                     out.write(str(query_num)+" 0 "+doc_num+" 1 42.38 mt\n")
             out.close()
+
+    def remove_stop_words(self, query):
+        ans=""
+        words= query.split()
+        for word in words:
+            if word.lower() not in self.stop_words:
+                ans+=word+" "
+        return ans
+
+
+
 
