@@ -32,6 +32,7 @@ class model(object):
     def __init__(self):
 
         self.term_dictionary = {}
+        self.term_dictionary_with_stemming = {}
         self.fake = ""
         self.cities_from_api = {}
         self.documents = {}
@@ -90,7 +91,10 @@ class model(object):
                 e = DictionaryElement(pos[0])
                 e.pointer = int(pos[1])
                 e.corpus_tf = int(pos[2])
-                self.term_dictionary[l[0]] = e
+                if stem_flag:
+                    self.term_dictionary[l[0]] = e
+                else:
+                    self.term_dictionary_with_stemming[l[0]] = e
         f.close()
 
     def read_docs_details(self, stem):
@@ -121,6 +125,9 @@ class model(object):
             self.cities_from_api[t["capital"].lower()] = [str(state_name), str(currency), str(pop)]
 
     def get_dictionary(self):
+        return self.term_dictionary
+
+    def get_dictionary_with_stemming(self):
         return self.term_dictionary
 
     def index(self, index_element):
@@ -191,7 +198,7 @@ class model(object):
         merger.language_index()
         print(time.time() - starttime)
 
-    def run_queries_file(self, file_path, semantic, city_choice, result_path=""):
+    def run_queries_file(self, file_path, semantic, city_choice,stem, result_path=""):
 
         with open(file_path , "r") as q:
             queries = dict()
@@ -213,7 +220,7 @@ class model(object):
                 self.write_results_to_disk(result_path,results)
             return results
 
-    def rum_custom_query(self, query_content, semantic_flag, city_choice, result_path=""):
+    def rum_custom_query(self, query_content, semantic_flag, city_choice,stem, result_path=""):
 
         p = Parse.Parser(self.stop_words)
         searcher = Searcher({}, self.term_dictionary, self.documents, self.avgl, self.posting_and_dictionary_path,p)

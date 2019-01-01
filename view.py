@@ -71,12 +71,13 @@ class view(object):
         if self.posting_path == "" or self.corpus_path=="":
             messagebox.showerror("Error", "you must enter the posting and dictionary path and corpus path before you can query")
             return
-        self.load_dictionary()
+        self.load_all_dictionary()
         self.load_entity()
 
         self.semanticFlag = IntVar()
         self.save_file_check = IntVar()
         self.detect_entities = IntVar()
+        self.stem_flag = IntVar()
         self.res_path=""
         self.qurey=""
         qurey_window = Toplevel(self.master)
@@ -84,6 +85,7 @@ class view(object):
         # qurey_window.geometry("620x470")
         qurey_window.resizable(0, 0)
         self.semantic_check=Checkbutton(qurey_window,text="Semantic Treatment?",variable=self.semanticFlag)
+        self.stemmer = Checkbutton(qurey_window, text="Stemming?", variable=self.stem_flag)
         self.save_in_file_check=Checkbutton(qurey_window,text="save query results in a file?",variable=self.save_file_check,command=lambda: self.save_or_not())
         self.detect=Checkbutton(qurey_window,text="Detect Entities?",variable=self.detect_entities)
         self.q_box_manual=Text(qurey_window, height=2, width=30)
@@ -110,7 +112,8 @@ class view(object):
         self.b_save_to_file.grid(row=2,column=2,columnspan=2,sticky=N+S+E+W,pady=30)
         self.semantic_check.grid(row=4,column=0,stick='NSW',padx=20)
         self.save_in_file_check.grid(row=4,column=1,stick='NSW', padx=30)
-        self.detect.grid(row=4,column=2,columnspan=2,stick='NSW', padx=20)
+        self.detect.grid(row=4,column=2,columnspan=2,stick='NSW', padx=30)
+        self.stemmer.grid(row=5,column=1,columnspan=1,stick='NSW', padx=20)
         self.b_save_to_file.config(state=DISABLED)
         vscroll = Scrollbar(qurey_window, orient=VERTICAL, command=self.city_selector.yview)
         vscroll1 = Scrollbar(qurey_window, orient=VERTICAL, command=self.lan_selector.yview)
@@ -293,7 +296,7 @@ class view(object):
             return
         city_choise=self.get_choosen_cites()
         qry = self.q_box_manual.get(1.0, END)
-        resualt_set = self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,result_path=self.res_path)
+        resualt_set = self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,self.stem_flag.get()==0,result_path=self.res_path)
         if self.save_file_check.get()==0 :
             self.display(resualt_set)
 
@@ -301,13 +304,30 @@ class view(object):
         if(self.qry_path == ""):
             messagebox.showerror("Path Error", " you need to provide query file path")
             return
-        results_set = self.control.run_query_from_file(self.qry_path,self.semanticFlag.get() == 0,self.get_choosen_cites(),self.res_path)
-        if self.save_file_check.get == 0:
-            self.display(results_set)
+        s_flag = self.semanticFlag.get() == 1
+        flag = self.save_file_check.get() == 1
+        results_set = self.control.run_query_from_file(self.qry_path,s_flag,self.get_choosen_cites(),self.stem_flag.get()==0,self.res_path)
+        if not flag:
+            self.display_new_window(self.display(results_set))
+        else:
+            messagebox.showinfo("Query finish","save results save at"+self.res_path)
 
 
     def display(self, resualt_set):
-        pass
+        data=""
+        for i in resualt_set.keys():
+            for j in resualt_set[i]:
+                data += i+": "+j+" "
+                if j in self.entity:
+                    if self.detect_entities.get() == 1:
+                        data+= "Entites: "+str(self.entity[j])
+                else:
+                    # data += i + j +" "
+                    if self.detect_entities.get() == 1:
+                        data += "Entites: None\n"
+                data += "\n"
+        return data
+
 
 
 
@@ -356,19 +376,46 @@ class view(object):
             pass
 
     def save_or_not(self):
-        flag= self.save_file_check.get()== 0
-        if flag:
+        flag= self.save_file_check.get()== 1
+        if not flag:
             self.b_save_to_file.config(state=DISABLED)
         else:
             self.b_save_to_file.config(state=ACTIVE)
 
     def load_entity(self):
-        with open("Test.txt","w") as f:
+        with open("Test.txt","r") as f:
             lines=f.readlines()
             for line in lines:
                 key_value=line.split(':')
                 self.entity[key_value[0]]=key_value[1]
 
+    def display_new_window(self, param):
+        res_window = Toplevel(self.master)
+        res_window.title("Results information")
+        if self.detect_entities.get() == 1:
+            res_window.geometry("900x600")
+        else:
+            res_window.geometry("500x400")
+
+        text = Text(res_window, height=600, width=600)
+        S = Scrollbar(res_window)
+        S.pack(side=RIGHT, fill=Y)
+        S.config(command=text.yview)
+        text.config(yscrollcommand=S.set)
+        text.pack()
+        to_display = param
+        text.insert(END, to_display)
+
+    def load_all_dictionary(self):
+        if self.posting_path == "":
+            messagebox.showerror("Error", "you must enter the posting and dictionary path before Loadind dictionary")
+            return
+        try:
+            self.control.load_dictionary_with_and_widtout()
+            # messagebox.showinfo("Load successful", "Dictionary was loaded to the RAM")
+        except:
+                messagebox.showerror("Error",
+                                     "loading dictionary went wrong")
 
 
 def main():

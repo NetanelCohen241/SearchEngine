@@ -74,8 +74,15 @@ class controller(object):
         self.model.read_docs_details(stem)
 
 
-    def run_query_from_file(self,path,semantic,city_choice,resualt_path=""):
-        return self.model.run_queries_file(path,semantic,city_choice,result_path=resualt_path)
+    def load_dictionary_with_and_widtout(self):
+            self.model.read_dictionary_from_file(True)
+            self.model.read_dictionary_from_file(False)
+            self.model.read_docs_details(False)
 
-    def rum_custom_query(self,qry, semanticFlag,city_choise, semantic_flag, city_choice, result_path=""):
-        return self.model.rum_custom_query(qry,semanticFlag,city_choise,semanticFlag,city_choise,result_path=result_path)
+
+
+    def run_query_from_file(self,path,semantic,city_choice,stem,resualt_path=""):
+        return self.model.run_queries_file(path,semantic,city_choice,stem,result_path=resualt_path)
+
+    def rum_custom_query(self,qry, semanticFlag,city_choise, semantic_flag, city_choice,stem, result_path=""):
+        return self.model.rum_custom_query(qry,semanticFlag,city_choise,semanticFlag,city_choise,stem,result_path=result_path)
