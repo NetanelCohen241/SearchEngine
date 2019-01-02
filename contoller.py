@@ -75,14 +75,37 @@ class controller(object):
 
 
     def load_dictionary_with_and_widtout(self):
-            self.model.read_dictionary_from_file(True)
-            self.model.read_dictionary_from_file(False)
-            self.model.read_docs_details(False)
+        """
+        this function load both dictionaries to the RAM
+        :return:
+        """
+        self.model.read_dictionary_from_file(True)
+        self.model.read_dictionary_from_file(False)
+        self.model.read_docs_details(False)
 
 
 
     def run_query_from_file(self,path,semantic,city_choice,stem,resualt_path=""):
+        """
+        get given path of query file and run the quries onr bu one
+        *****the qurey must be in a specific format****
+        :param path: location of the quries file
+        :param semantic: bool var that indicat to run the query with a semantic stetment or not
+        :param city_choice: list of cities to filter by
+        :param stem: bool var that indicate to run a stemming or not
+        :param resualt_path: resualt path to save the data un trec eval format
+        :return: dictionary with the nummber of the query as a key and list of relevant documents as the value
+        """
         return self.model.run_queries_file(path,semantic,city_choice,stem,result_path=resualt_path)
 
-    def rum_custom_query(self,qry, semanticFlag,city_choise, semantic_flag, city_choice,stem, result_path=""):
-        return self.model.rum_custom_query(qry,semanticFlag,city_choise,semanticFlag,city_choise,stem,result_path=result_path)
+    def rum_custom_query(self,qry, semantic_flag,city_choise,stem, result_path=""):
+        """
+        get a custome qry from the user and serch result
+        :param qry: costume query as a string
+        :param semantic_flag:  bool var that indicat to run the query with a semantic stetment or not
+        :param city_choise: list of cities to filter by
+        :param stem: bool var that indicate to run a stemming or not
+        :param result_path: resualt path to save the data un trec eval format
+        :return: dictionary with the nummber of the query as a key and list of relevant documents as the value
+        """
+        return self.model.rum_custom_query(qry,semantic_flag,city_choise,stem,result_path)

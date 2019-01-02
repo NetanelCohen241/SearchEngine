@@ -272,7 +272,7 @@ class model(object):
         #write the result content to disk
         if result_path != "":
             self.write_results_to_disk(result_path, {"15":results})
-        return {"15":results}
+        return {15: results}
 
     def write_results_to_disk(self, result_path,results):
 

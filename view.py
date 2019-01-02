@@ -67,11 +67,17 @@ class view(object):
 
 
     def query_options(self):
-
+        """
+        open a new window for partB with all thw widget to execute a query
+        :return:
+        """
         if self.posting_path == "" or self.corpus_path=="":
             messagebox.showerror("Error", "you must enter the posting and dictionary path and corpus path before you can query")
             return
-        self.load_all_dictionary()
+        try:
+            self.load_all_dictionary()
+        except:
+            return
         self.load_entity()
 
         self.semanticFlag = IntVar()
@@ -249,6 +255,10 @@ class view(object):
             return
 
     def disabel_buttons(self):
+        """
+        disabel button after run the index process
+        :return:
+        """
         self.b_start.config(state=DISABLED)
         self.b_browse_corpus.config(state=DISABLED)
         self.b_browse_posting_and_dict.config(state=DISABLED)
@@ -259,6 +269,10 @@ class view(object):
 
 
     def activate_buttons(self):
+        """
+        activate all the buttons on the main window
+        :return:
+        """
         self.b_start.config(state=ACTIVE)
         self.b_browse_corpus.config(state=ACTIVE)
         self.b_browse_posting_and_dict.config(state=ACTIVE)
@@ -268,6 +282,12 @@ class view(object):
         self.stemCheck.config(state=ACTIVE)
 
     def cb(self,stemmer,trash):
+        """
+        call back function that execute after the index thread is done!
+        :param stemmer:
+        :param trash:
+        :return:
+        """
         index_time = time.time() - self.start_time
         num_of_docs = 0
         with open(self.posting_path + "/docs.txt" if not stemmer else self.posting_path + "/docsStem.txt") as f:
@@ -283,6 +303,10 @@ class view(object):
         self.activate_buttons()
 
     def clik_on_browse_query(self):
+        """
+        open a file dialg with the user to select a path to a query file
+        :return:
+        """
         try:
             self.qry_path = filedialog.askopenfilename()
             self.q_box_from_path.delete('1.0', END)
@@ -291,16 +315,27 @@ class view(object):
             pass
 
     def clik_on_run(self):
-        if(self.qurey==""):
+        """
+        run the qury that enterd to the custom querey text box
+        :return:
+        """
+        qry = self.q_box_manual.get(1.0, END)
+        if(qry==""):
             messagebox.showerror("Query Error","qurey cant be empty")
             return
+        s_flag=self.semanticFlag.get() == 1
+        stem_flag=self.stem_flag.get() == 1
         city_choise=self.get_choosen_cites()
-        qry = self.q_box_manual.get(1.0, END)
-        resualt_set = self.control.rum_custom_query(qry, self.semanticFlag.get() == 0, city_choise,self.stem_flag.get()==0,result_path=self.res_path)
-        if self.save_file_check.get()==0 :
-            self.display(resualt_set)
+        resualt_set = self.control.rum_custom_query(qry,s_flag,city_choise,stem_flag,self.res_path)
+        display_flag=self.save_file_check.get() == 1
+        if not display_flag:
+            self.display_new_window(self.display(resualt_set))
 
     def clik_on_run_from_file(self):
+        """
+        take the path of the query file and run it one query at the time
+        :return:
+        """
         if(self.qry_path == ""):
             messagebox.showerror("Path Error", " you need to provide query file path")
             return
@@ -314,6 +349,11 @@ class view(object):
 
 
     def display(self, resualt_set):
+        """
+        return string to display in a format #qry: #document [Entites: X Y Z W T]
+        :param resualt_set: given dictionary with key=query number and value=list of documents
+        :return:
+        """
         data=""
         for i in resualt_set.keys():
             for j in resualt_set[i]:
@@ -330,11 +370,11 @@ class view(object):
 
 
 
-
-
-
-
     def get_choosen_cites(self):
+        """
+        return a list of choosen cites that the user choose from the list box that display in the query option window
+        :return:
+        """
         city_choise = []
         i = self.city_selector.curselection()
         idx = 0
@@ -345,6 +385,10 @@ class view(object):
         return city_choise
 
     def fill_cities(self):
+        """
+        fill the cities list from the city file
+        :return:
+        """
         self.choices = []
         with open(self.posting_path + "/cities.txt") as f:
             idx=0
@@ -357,6 +401,10 @@ class view(object):
 
 
     def fill_lan(self):
+        """
+        fill the languages from the language file
+        :return:
+        """
         self.choices_lan = []
         with open(self.posting_path + "/languages.txt") as f:
             idx=0
@@ -368,6 +416,10 @@ class view(object):
         f.close()
 
     def click_on_browse_resulat(self):
+        """
+        open a file dialog with the user to select a folder path to save the query results
+        :return:
+        """
         try:
             self.res_path = filedialog.askdirectory()
             self.q_save_path.delete('1.0', END)
@@ -376,6 +428,10 @@ class view(object):
             pass
 
     def save_or_not(self):
+        """
+        enable or disable the option to browse a folser to save results according to check box
+        :return:
+        """
         flag= self.save_file_check.get()== 1
         if not flag:
             self.b_save_to_file.config(state=DISABLED)
@@ -383,6 +439,10 @@ class view(object):
             self.b_save_to_file.config(state=ACTIVE)
 
     def load_entity(self):
+        """
+        load a inverted index to #doc to it's entities
+        :return:
+        """
         with open("Test.txt","r") as f:
             lines=f.readlines()
             for line in lines:
@@ -390,6 +450,11 @@ class view(object):
                 self.entity[key_value[0]]=key_value[1]
 
     def display_new_window(self, param):
+        """
+        open a new window to display query results
+        :param param:
+        :return:
+        """
         res_window = Toplevel(self.master)
         res_window.title("Results information")
         if self.detect_entities.get() == 1:
@@ -407,6 +472,10 @@ class view(object):
         text.insert(END, to_display)
 
     def load_all_dictionary(self):
+        """
+        load dictionary to the RAM both stemmed and not stemmed
+        :return:
+        """
         if self.posting_path == "":
             messagebox.showerror("Error", "you must enter the posting and dictionary path before Loadind dictionary")
             return
@@ -416,6 +485,7 @@ class view(object):
         except:
                 messagebox.showerror("Error",
                                      "loading dictionary went wrong")
+                raise Exception()
 
 
 def main():
