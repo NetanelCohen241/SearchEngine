@@ -264,7 +264,7 @@ class model(object):
         # ask from api the synonyms of each word on query
         if semantic_flag:
             for word in query_content.split():
-                synonyms = api.suggest(s=word, max=2)
+                synonyms = api.suggest(s=word, max=1)
                 for item in synonyms:
                     semantic_words += " " + item["word"] + " " if item["word"] != word.lower() else ""
             query_content += semantic_words
