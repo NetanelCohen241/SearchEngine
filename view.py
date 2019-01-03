@@ -443,7 +443,7 @@ class view(object):
         load a inverted index to #doc to it's entities
         :return:
         """
-        with open("Test.txt","r") as f:
+        with open(self.posting_path+"/Entities.txt","r") as f:
             lines=f.readlines()
             for line in lines:
                 key_value=line.split(':')
